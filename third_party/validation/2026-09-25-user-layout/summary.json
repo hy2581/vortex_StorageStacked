@@ -1,0 +1,172 @@
+{
+  "passed": true,
+  "date": "2026-09-25",
+  "storage_commit": "d74b455ef41b6165673b140d49ce0b0b59d65cd6",
+  "execution_groups": {
+    "regression_cases": 7,
+    "separately_executed_hardware_case": 1,
+    "tutorial_and_custom_cases": 2
+  },
+  "cases": {
+    "smoke": {
+      "passed": true,
+      "output": 42,
+      "gpu_cycles": 1150,
+      "axi_handshakes": 28458,
+      "summary": "cases/smoke/summary.json"
+    },
+    "smoke_slow": {
+      "passed": true,
+      "output": 42,
+      "gpu_cycles": 2212,
+      "axi_handshakes": 28458,
+      "summary": "cases/smoke_slow/summary.json"
+    },
+    "smoke_wrap": {
+      "passed": true,
+      "output": 0,
+      "gpu_cycles": 1059,
+      "axi_handshakes": 28427,
+      "summary": "cases/smoke_wrap/summary.json"
+    },
+    "llm": {
+      "passed": true,
+      "output": "blu",
+      "gpu_cycles": 412691,
+      "axi_handshakes": 57880,
+      "summary": "cases/llm/summary.json"
+    },
+    "llm_no_cache": {
+      "passed": true,
+      "output": "blu",
+      "gpu_cycles": 867871,
+      "axi_handshakes": 78838,
+      "summary": "cases/llm_no_cache/summary.json"
+    },
+    "llm_replay": {
+      "passed": true,
+      "output": "blu",
+      "gpu_cycles": 416701,
+      "axi_handshakes": 57880,
+      "summary": "cases/llm_replay/summary.json"
+    },
+    "llm_long": {
+      "passed": true,
+      "output": "blue",
+      "gpu_cycles": 823153,
+      "axi_handshakes": 74254,
+      "summary": "cases/llm_long/summary.json"
+    },
+    "smoke_arch": {
+      "passed": true,
+      "output": 42,
+      "gpu_cycles": 1310,
+      "axi_handshakes": 28662,
+      "summary": "cases/smoke_arch/summary.json"
+    },
+    "tutorial_smoke": {
+      "passed": true,
+      "output": 42,
+      "gpu_cycles": 1150,
+      "axi_handshakes": 28458,
+      "summary": "cases/tutorial_smoke/summary.json"
+    },
+    "custom_project": {
+      "passed": true,
+      "output": "1 word matched",
+      "gpu_cycles": 827,
+      "axi_handshakes": 28372,
+      "summary": "cases/custom_project/summary.json"
+    }
+  },
+  "native_tests_passed": 19,
+  "api_check": {
+    "passed": true,
+    "masked_read": [
+      1,
+      0,
+      3,
+      0,
+      5,
+      0,
+      7,
+      0
+    ],
+    "queue_retry": true,
+    "large_window_bytes": 8589934592,
+    "high_address_no_alias": true,
+    "sparse_zero_initialized": true
+  },
+  "negative": {
+    "passed": true,
+    "checks": {
+      "gpu.cores": true,
+      "gpu.l1i_bytes": true,
+      "host.num_cpus": true,
+      "host.l2": true,
+      "host.tlb_entries": true,
+      "axi.outstanding": true,
+      "axi.period_ns": true,
+      "axi.replay": true,
+      "ucie.lanes": true,
+      "ucie.bits_per_symbol": true,
+      "ucie.rate_gtps": true,
+      "memsim.standard": true,
+      "memsim.slots": true,
+      "simulation.max_ticks": true,
+      "smoke_output": true,
+      "smoke_status": true,
+      "weight": true,
+      "kv": true,
+      "intermediate": true,
+      "generated_token": true,
+      "forward_count": true,
+      "missing_output": true
+    }
+  },
+  "entrypoint_rejections": {
+    "optimization": {
+      "passed": true,
+      "log": "optimization-refusal.log"
+    },
+    "overwrite": {
+      "passed": true,
+      "log": "overwrite-refusal.log"
+    },
+    "path": {
+      "passed": true,
+      "log": "path-refusal.log"
+    }
+  },
+  "comparisons": {
+    "memory_feedback": {
+      "passed": true,
+      "base_cycles": 1150,
+      "slow_cycles": 2212
+    },
+    "kv_cache": {
+      "passed": true,
+      "cached_calls": 6,
+      "uncached_calls": 15
+    }
+  },
+  "fp32_exp": {
+    "samples": 1000001,
+    "max_abs_error": 5.68824881642e-08,
+    "max_relative_error_above_cutoff": 9.83601222398e-08,
+    "errors": 0,
+    "passed": true
+  },
+  "source_export": {
+    "passed": true,
+    "scope": [
+      "tracked-source export into a different directory",
+      "exact six-entry repository layout",
+      "relative-path build and run help",
+      "vendored source/version checks",
+      "no gitlinks or .gitmodules"
+    ],
+    "full_build_in_export": false
+  },
+  "evidence_note": "Case summaries retain actual validation results; cache statistics are selected totals. Large raw waves and traces remain in the local result directories. Tutorial results were archived after execution. File names in environment.json describe the original run directory."
+}

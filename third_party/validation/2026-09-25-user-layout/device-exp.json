@@ -1,0 +1,7 @@
+{
+  "samples": 1000001,
+  "max_abs_error": 5.68824881642e-08,
+  "max_relative_error_above_cutoff": 9.83601222398e-08,
+  "errors": 0,
+  "passed": true
+}

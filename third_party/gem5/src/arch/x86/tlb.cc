@@ -36,6 +36,7 @@
  */
 
 #include "arch/x86/tlb.hh"
+#include "arch/x86/translation_trace.hh"
 
 #include <cstring>
 #include <memory>
@@ -504,6 +505,7 @@ TLB::translate(const RequestPtr &req,
             Addr paddr = entry->paddr | (vaddr & mask(entry->logBytes));
             DPRINTF(TLB, "Translated %#x -> %#x.\n", vaddr, paddr);
             req->setPaddr(paddr);
+            traceTranslation(name(), tc->contextId(), vaddr, paddr, int(mode));
             if (entry->uncacheable)
                 req->setFlags(Request::UNCACHEABLE | Request::STRICT_ORDER);
         } else {

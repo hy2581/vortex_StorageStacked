@@ -1,153 +1,94 @@
-# vortex_StorageStacked
+# Vortex StorageStacked
 
-Vortex SimX 在 gem5 的事件队列中执行 GPU 内核；gem5 中的 x86 主机只负责官方运行库与 benchmark 的控制、输入和结果检查。
+基于 gem5 多核 CPU 与 Vortex GPU 执行用户程序，经 AXI256、UCIe 访问在线 MEMSIM。用户在 `user/` 配置、编译、运行和查看结果；`integration/` 提供与独立 AXI 存储项目的连接。
+
+## 目录
 
 ```text
-gem5 主机 + Vortex SimX
-  → gem5 timing 请求 → 原生 TLM → AXI256 五通道
-  → AXI2Flit → 双向 UCIe → mem_sim 控制器 / 行为级 PHY
-  ← 沿原路径返回真实读数据和写完成
+vortex_StorageStacked/
+├── README.md
+├── build.sh
+├── user/
+│   ├── run.sh
+│   ├── smoke/               config.json + src/Makefile、smoke.cpp + result/
+│   └── llm/                 config.json + src/Makefile、tinyllm.h/.cpp + result/
+├── docs/                    用户说明和研究成果分析
+├── third_party/             gem5、Vortex、SDK、内部工具与构建缓存
+└── integration/             gem5/TLM 到公共 AXI 存储的桥接
 ```
 
-## 从 GitHub 获取
+## 首次构建
+
+将两个仓库放在同级目录：
 
 ```bash
 git clone https://github.com/hy2581/axi_StorageStacked.git
 git clone https://github.com/hy2581/vortex_StorageStacked.git
 cd vortex_StorageStacked
-./run.sh setup
-./run.sh build
-./run.sh run
+./build.sh --storage ../axi_StorageStacked --jobs 12
 ```
 
-驱动源码直接保存在本仓库，包含 `third_party/` 中的 gem5 与 Vortex。AXI 信号之后的完整存储链路位于独立的 `axi_StorageStacked` 仓库；不使用 submodule。
-`setup` 只检查源码快照并准备工具依赖，不递归拉取 Git 仓库。
-Git 保存源码、配置、补丁、许可证和 `validation/` 验收摘要；本机工具链、编译缓存和完整波形由构建/运行生成。
-Vortex 的可选工艺库、无关系统包和大型 OpenCL 数据集不属于本项目 SimX 构建输入，留在本机。
+环境为 Linux x86-64；首次构建准备固定版本工具和平台。使用相对路径保存依赖位置，不使用 submodule。复制源码到新位置后重新执行 `build.sh`，脚本管理内部缓存。
 
-## 在本机运行
-
-首次了解本工程，可按顺序阅读以下三篇中文说明：
-
-1. [对 Vortex 做了哪些修改](docs/01-vortex-changes.md)
-2. [如何修改参数和配置 benchmark](docs/02-configuration-and-benchmarks.md)
-3. [当前 LLM 负载状态与计算位置](docs/03-llm-workload-status.md)
+## 运行项目
 
 ```bash
-# 在 vortex_StorageStacked 仓库根目录执行
-./run.sh check
-./run.sh run
+cd user
+./run.sh smoke
+./run.sh llm
+# 自选结果目录，每次使用新目录
+./run.sh smoke --output result/my-check
 ```
 
-`check` 检查环境、动态库、设备隔离；`run` 才会执行 benchmark 并校验数据与完整链路。
-结果默认写入新的 `results/时间戳/`，禁止覆盖已有目录。
-成功以 `summary.json` 的 `passed: true` 为准，失败保留日志和 `passed: false`。
+- **SMOKE**：默认输入 `41`，四个工作组分别写入、读回、加一，输出 `42`。
+- **LLM**：与 CoralNPU 示例采用相同 TinyLLM 模型；输入 `"red "`，生成 `"blu"`，token ID `[4, 10, 15]`。
 
-## 配置和重新构建
+每个项目只有一个 `config.json`。其中配置程序输入、GPU 核/warp/线程、CPU 核数、MMU/TLB、缓存、AXI、UCIe、MEMSIM 和仿真上限。修改后直接运行；需要更新的平台编译由入口处理。
 
-**日常只改 [`config/run.toml`](config/run.toml)**，每项都有中文注释。
-文件开头选择 benchmark 和 GPU 核数/warp/线程数，后面设置内存、链路和主机。
-所有配置均在 [`config/`](config/README.md)；缓存/ISA 等高级 SimX 默认值在 `config/simx.toml`。
+新增项目遵循同样结构：`user/<项目>/config.json` 和 `src/Makefile`、源文件。`./run.sh <项目>` 不需要注册项目名，Makefile 通过 SDK 生成主机及设备程序。
 
-```toml
-# config/run.toml 开头；其余参数通常保持默认。
-[benchmark]
-name = "vecadd"
-elements = 64
+## 输出和验收
 
-[gpu]
-clock_mhz = 1000
-cores = 1
-warps = 4
-threads = 4
-```
+结果保存到 `user/<项目>/result/<运行目录>/`。入口打印 `report.md` 位置；成功要求 `summary.json` 的 `passed: true`。
+
+报告给出输入输出、GPU 周期、事务和独立校验结果。目录还保存配置、编译成果、实际回读字节、地址转换、缓存统计、AXI VCD、Flit、内存记录和链路视图。TinyLLM 会逐项核对权重、KV、中间结果与 token。
 
 ```bash
-# 新环境：只准备本工程需要的固定版本依赖
-./run.sh setup
-# 首次或修改 C++ / RTL / 适配源码后重新构建
-./run.sh build
-# 查看最终参数、访存路径和是否需要重新构建设备
-./run.sh config
-# 运行并校验；GPU 架构改变时自动重建设备和全部已接入算例
-./run.sh run --output results/my-case
-# 使用另一份完整配置；相对路径从工程根目录解析
-./run.sh run --config config/my-experiment.toml
-# 选择另一份 benchmark 配置
-./run.sh run --benchmark config/benchmarks/vecadd64.json
-# 常见 LLM 基础算子：矩阵向量乘、Softmax、ReLU
-./run.sh run --benchmark config/benchmarks/sgemv.json
-./run.sh run --benchmark config/benchmarks/softmax.json
-./run.sh run --benchmark config/benchmarks/relu.json
-# 内存延迟与重放实验
-./run.sh run --scale 4
-./run.sh run --replay
-# 完整验收：原生内存、C ABI、链路对照及全部已接入算子
-./run.sh test
+# 在 user/ 中执行单类回归
+./run.sh smoke --test
+./run.sh llm --test
+# 在仓库根目录执行整体构建与回归
+./build.sh --test
 ```
 
-命令示例统一使用相对路径；benchmark 的相对路径相对于本工程根目录，
-`--output` 的相对路径相对于调用命令时的工作目录。
+本次重构已完成 8 组平台场景、从零添加项目的 2 次运行、19 项原生测试、在线内存接口与 22 项错误拒绝检查。精简记录见 [重构验收](third_party/validation/2026-09-25-user-layout/README.md)。默认 SMOKE 为 `41 → 42`，TinyLLM 为 `"red " → "blu"`；慢内存、KV cache、重放及硬件参数变更均通过独立核对。
 
-GPU 编译参数或 SimX 高级默认值改变时，run 自动构建设备与全部已接入内核。
-同一 GPU 配置下切换 vecadd、sgemm、sgemv、softmax、relu 无需重建设备库。
-`--benchmark` 只替换算例，`--scale` / `--replay` 只覆盖本次实验；
-同样的参数可交给 `./run.sh config` 预览，最终生效值保存在结果目录的 `resolved.json`。
+## 运行链路
 
-## 如何发射和完成访存
+```mermaid
+flowchart LR
+    A[user JSON + Makefile] --> B[gem5 CPU / MMU / 多级缓存]
+    B --> C[Vortex 多核 GPU]
+    B --> D[integration: timing / TLM / AXI256]
+    C --> D
+    D <--> E[axi_StorageStacked: AXI2Flit / UCIe / MEMSIM]
+    D --> F[实际数据和链路校验]
+    E --> F
+    F --> G[user 项目 result]
+```
 
-GPU 指令、warp 调度和缓存由原生 SimX 执行；gem5 的事件队列每个设备周期推进一次 SimX。
-SimX 缓存之后的外部请求通过适配层调用 gem5 `dmaRead` / `dmaWrite`，
-沿上图进入在线 mem_sim；返回事件将真实读数据或写完成交回 SimX。
-命令处理器 CP 的 DMA 也走同一条 gem5 timing 链路，并等待响应再继续。
-主机程序/栈使用独立的本地主存；主机对 GPU BAR 的上传、下载走完整在线链路。
+主机程序和栈使用主机内存；主机访问 GPU BAR 和 GPU 外部访存走公共存储链路。设备执行、缓存行为、实际返回数据和存储延迟共同决定仿真结果。gem5 使用自带的一套 SystemC，时间基准为 1 fs。
 
-`axi.outstanding` 是桥中同时处理的 TLM 请求上限，不是 GPU 指令发射宽度。
-缓存命中不经过外部链路，SimX 请求、gem5 packet、AXI beat 和 Flit 的计数也不相等。
-代码入口与请求/返回职责见 [`integration/README.md`](integration/README.md)。
+`axi_StorageStacked` 提供统一存储接口；`coralnpu_StorageStacked` 通过其原生 NPU 桥独立接入相同接口，各运行实例拥有独立内存状态。
 
-## 目录
+## 文档
 
-| 目录 | 用途 |
+| 文档 | 内容 |
 |---|---|
-| `config/` | 所有公开配置、benchmark 预设、版本锁定、配置说明 |
-| `scripts/` | 一套 setup/build/run/test/check 入口与唯一仿真拓扑 |
-| `integration/` | 仅本设备的 gem5 适配、协议观察器和必要外部补丁 |
-| `benchmarks/` | 本项目 benchmark 源码或官方源码入口说明 |
-| `gem5_axi/` | 原生 TLM → AXI256 驱动适配；存储实现由公共项目提供 |
-| `../axi_StorageStacked/` | 独立公共依赖：AXI 信号端口、AXI2Flit、UCIe、在线内存和共用验收器 |
-| `third_party/` | 本项目自己的 gem5 和 vortex 固定版本源码 |
-| `.deps/` | 本驱动自己的工具链、编译依赖和缓存 |
-| `build/`、`results/` | 编译产物和实际运行证据 |
+| [用户环境配置说明](docs/01-用户环境配置说明.md) | 准备环境、全部参数、运行和输出 |
+| [从 0 添加 SMOKE 简要指南](docs/02-用户从0开始添加SMOKE简要指南.md) | 按步骤添加新项目，解释输入和输出 |
+| [LLM 简要说明](docs/03-LLM简要说明.md) | 两个源码文件、推理流程、KV 和数值核对 |
+| [integration 介绍](docs/04-integration介绍.md) | 七个文件各自职责与流程图 |
+| [研究成果一分析](docs/05-研究成果一分析.md) | 三项目如何实现 SoC 模型各项内容 |
 
-两个驱动互不链接，均通过公共 AXI256 端口驱动同一份 `axi_StorageStacked` 源码。
-默认依赖路径为 `../axi_StorageStacked`；其他位置可在仓库根目录使用
-`export STORAGE_STACK_ROOT=../其他目录/axi_StorageStacked` 指定，然后从该目录执行构建和运行。
-切换公共项目路径或版本后必须重新 build；运行入口会拒绝路径与构建记录不一致的二进制。
-依赖声明在 `config/storage_dependency.json`，每次运行在 `environment.json` 记录公共项目版本/提交号。
-内存库分别编译到各驱动的 `build/memsim/`，不会共用另一个驱动的二进制。
-本次从本机已准备的固定版本源码与包缓存建立环境，分别在新目录重编译。
-源码来源见 `config/sources.json`，当前分拆说明见 `SPLIT_NOTES.md`。
-复制到不同路径后执行 setup/build，重建含绝对 RPATH 的产物；不要直接搬用旧编译缓存。
-新机器需要 Linux x86-64、Bash、Git、curl、make、patch、tar、C/C++ 基础开发工具与网络，
-建议至少 32 GB 内存。默认编译并行度为 12，可在 `config/environment.sh` 修改。
-`SS_OFFLINE=1` 禁止 setup 下载；离线准备需要预置完整源码和依赖缓存。
-
-## 验收证据与边界
-
-本次实际执行结果见 [`ACCEPTANCE.md`](ACCEPTANCE.md)。
-
-每次运行保存 `resolved.json`、`environment.json`、`completion.json`、`summary.json`，
-并保留 AXI 五通道 VCD、两端 Flit、内存请求/返回、DRAM 命令、DFI、最终内存镜像、
-来源 trace 和分块 HTML。`memsim_view.html` 可按请求查看链路；
-在工程目录执行 `python3 -m http.server 8000` 后通过浏览器打开结果页面，交接时复制整个用例目录。
-
-来源 HETTrace 是 gem5 packet 的协议投影，实际 AXI 握手以 `axi_wave.vcd` 和五通道日志为准。
-仅使用 gem5 自带的一套 SystemC，统一时间单位为 1 fs。
-SimX 是 C++ 功能/周期模型，不是完整 GPU RTL；主机程序和栈留在本地主存，GPU 缓冲区通过在线链路。
-内存 PHY/DFI 为行为模型，HBM4 预设含临时时序项；结果用于本模型的功能与时序比较。
-当前不支持完整链路上的通用 functional/atomic 访问、checkpoint 或跨设备缓存一致性。
-
-长验收允许续跑：`./run.sh test --resume --output results/已有验收目录`。
-仅复用配置、来源版本和产物大小匹配的已通过场景；更改源码后使用新目录重新验收。
-同一编译配置的场景并行运行，重新编译设备时使用独占锁，防止运行中替换动态库。
+上游许可证和版本记录保留在 `third_party/`；交付源码包含本平台所需的集成扩展，来源记录见 [third_party/patches/README.md](third_party/patches/README.md)。

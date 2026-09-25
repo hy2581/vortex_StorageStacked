@@ -1,0 +1,217 @@
+{
+  "passed": true,
+  "device": "vortex",
+  "benchmark": {
+    "name": "smoke",
+    "input": 41,
+    "workers": 4
+  },
+  "axi_data_bits": 256,
+  "completion": {
+    "cause": "exiting with last active thread context",
+    "code": 0,
+    "tick_fs": 3253989000000,
+    "passed": true
+  },
+  "sources": {
+    "vortex": {
+      "transactions": 271,
+      "bytes": 15016,
+      "roundtrip_mean_ns": 285.42435424354244
+    },
+    "host": {
+      "transactions": 9210,
+      "bytes": 73672,
+      "roundtrip_mean_ns": 73.01476655808904
+    }
+  },
+  "devices": {
+    "core_read": 10,
+    "core_write": 9,
+    "cp_read": 44,
+    "cp_write": 44,
+    "completed": 107,
+    "cp_cycles": 2393,
+    "cycles": 2212
+  },
+  "checks": {
+    "check_summary": {
+      "passed": true,
+      "axi_data_bits": 256,
+      "transactions": 9481,
+      "axi_handshakes": 28458,
+      "max_tlm_latency_ns": 1173.0,
+      "coverage": {
+        "narrow_bursts": 9252,
+        "full_width_bursts": 229,
+        "bursts_256_beats": 0,
+        "masked_write_beats": 18,
+        "aw_before_w": 9267,
+        "w_before_aw": 0,
+        "error_responses": 0,
+        "checked_read_bytes": 9164
+      }
+    },
+    "aou_check_summary": {
+      "passed": true,
+      "master_data_bits": 256,
+      "wide_handshakes": 28458,
+      "wide_vcd_data_beats": 9710,
+      "width": 256,
+      "planes": 2,
+      "memory_completed": 9481,
+      "memory_errors": 0,
+      "target_reads": 214,
+      "target_writes": 9267,
+      "target_read_beats": 347,
+      "target_write_beats": 9363,
+      "tx_flits": 28299,
+      "rx_flits": 37952,
+      "forward_replays": 0,
+      "reverse_replays": 0,
+      "crc_errors": 0,
+      "order_violations": 0
+    },
+    "memsim_check": {
+      "passed": true,
+      "bursts": 9481,
+      "children": 9710,
+      "errors": 0,
+      "image_bytes": 75712,
+      "window_bytes": 4294967296,
+      "period_fs": 1000000,
+      "commands": {
+        "REFpb": 106688,
+        "ACT": 162,
+        "WR": 9363,
+        "PREpb": 162,
+        "RD": 347
+      },
+      "dfi_data_events": 10168,
+      "submit_stalls": 3277,
+      "response_stalls": 0
+    },
+    "memsim_core": {
+      "passed": true,
+      "submitted": 9710,
+      "returned": 9710,
+      "submit_stalls": 3277,
+      "cycles": 3253989,
+      "commands": 116722,
+      "dfi_events": 126890,
+      "command_errors": 0,
+      "dfi_errors": 0
+    }
+  },
+  "wave": {
+    "smoke_slow": {
+      "passed": true,
+      "sampled_rising_edges": 1626995,
+      "handshakes": {
+        "AW": 9267,
+        "W": 9363,
+        "B": 9267,
+        "AR": 214,
+        "R": 347
+      },
+      "stalled_edges": {
+        "W": 23108,
+        "B": 3892,
+        "R": 247
+      },
+      "first_valid_ns": {
+        "wvalid": 2271452.0,
+        "awvalid": 2271458.0,
+        "bvalid": 2271544.0,
+        "arvalid": 2988632.0,
+        "rvalid": 2988736.0
+      },
+      "ready_transitions": {
+        "arready": 2,
+        "awready": 2,
+        "bready": 650795,
+        "rready": 464854,
+        "wready": 18507
+      },
+      "first_handshake_ns": {
+        "AW": 2271460.0,
+        "W": 2271464.0,
+        "B": 2271546.0,
+        "AR": 2988634.0,
+        "R": 2988740.0
+      },
+      "checked": [
+        "VCD/CSV equality",
+        "VALID/payload hold",
+        "clocked output transitions",
+        "BVALID after AW/all W",
+        "RVALID after AR",
+        "WLAST/RLAST",
+        "drained"
+      ]
+    }
+  },
+  "scope": "accelerator -> native AXI256 -> AXI2Flit -> UCIe -> online mem_sim -> returned data",
+  "smoke": {
+    "passed": true,
+    "input": 41,
+    "output": 42,
+    "expected_output": 42,
+    "workers": 4
+  },
+  "soc": {
+    "passed": true,
+    "mode": "gem5 syscall emulation with x86 MMU and emulated process page tables",
+    "host": {
+      "clock_mhz": 2000,
+      "num_cpus": 4,
+      "l1i": "32KiB",
+      "l1d": "32KiB",
+      "l2": "1MiB",
+      "tlb_entries": 64
+    },
+    "gpu": {
+      "clock_mhz": 1000,
+      "cores": 2,
+      "warps": 4,
+      "threads": 4,
+      "l1i_bytes": 16384,
+      "l1d_bytes": 16384,
+      "l2_enabled": false,
+      "l2_bytes": 1048576
+    },
+    "translation_samples": 128,
+    "non_identity_samples": 128,
+    "example": {
+      "context": "0",
+      "tlb": "systemc_kernel.system.cpu0.mmu.itb",
+      "virtual_address": "140737354261824",
+      "physical_address": "2147632448",
+      "mode": "2",
+      "tick_fs": "0"
+    },
+    "cache_tlb_statistics": {
+      "systemc_kernel.system.cpu0.dcache.demandHits::total": 841521.0,
+      "systemc_kernel.system.cpu0.dcache.demandMisses::total": 20683.0,
+      "systemc_kernel.system.cpu0.dcache.demandAccesses::total": 862204.0,
+      "systemc_kernel.system.cpu0.icache.demandHits::total": 3099303.0,
+      "systemc_kernel.system.cpu0.icache.demandMisses::total": 4025.0,
+      "systemc_kernel.system.cpu0.icache.demandAccesses::total": 3103328.0,
+      "systemc_kernel.system.cpu1.dcache.demandHits::total": 15251.0,
+      "systemc_kernel.system.cpu1.dcache.demandMisses::total": 362.0,
+      "systemc_kernel.system.cpu1.dcache.demandAccesses::total": 15613.0,
+      "systemc_kernel.system.cpu1.icache.demandHits::total": 43800.0,
+      "systemc_kernel.system.cpu1.icache.demandMisses::total": 494.0,
+      "systemc_kernel.system.cpu1.icache.demandAccesses::total": 44294.0,
+      "systemc_kernel.system.l2cache.demandHits::total": 11008.0,
+      "systemc_kernel.system.l2cache.demandMisses::total": 14280.0,
+      "systemc_kernel.system.l2cache.demandAccesses::total": 25288.0
+    }
+  },
+  "gpu_memory_order": {
+    "passed": true,
+    "checked_dependencies": 10,
+    "core_requests": 19
+  },
+  "raw_result_directory": "../../../user/smoke/result/test-20260925-214647/smoke_slow"
+}

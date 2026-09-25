@@ -1,0 +1,222 @@
+{
+  "passed": true,
+  "device": "vortex",
+  "benchmark": {
+    "name": "custom",
+    "workers": 1,
+    "defines": {
+      "INPUT": 41
+    },
+    "expect": [
+      {
+        "address": "0x90010000",
+        "value": 42
+      }
+    ]
+  },
+  "axi_data_bits": 256,
+  "completion": {
+    "cause": "exiting with last active thread context",
+    "code": 0,
+    "tick_fs": 3143798500000,
+    "passed": true
+  },
+  "sources": {
+    "vortex": {
+      "transactions": 256,
+      "bytes": 14184,
+      "roundtrip_mean_ns": 130.029296875
+    },
+    "host": {
+      "transactions": 9196,
+      "bytes": 73552,
+      "roundtrip_mean_ns": 63.00543714658547
+    }
+  },
+  "devices": {
+    "core_read": 5,
+    "core_write": 3,
+    "cp_read": 42,
+    "cp_write": 42,
+    "completed": 92,
+    "cp_cycles": 1004,
+    "cycles": 827
+  },
+  "checks": {
+    "check_summary": {
+      "passed": true,
+      "axi_data_bits": 256,
+      "transactions": 9452,
+      "axi_handshakes": 28372,
+      "max_tlm_latency_ns": 346.0,
+      "coverage": {
+        "narrow_bursts": 9235,
+        "full_width_bursts": 217,
+        "bursts_256_beats": 0,
+        "masked_write_beats": 6,
+        "aw_before_w": 9251,
+        "w_before_aw": 0,
+        "error_responses": 0,
+        "checked_read_bytes": 8696
+      }
+    },
+    "aou_check_summary": {
+      "passed": true,
+      "master_data_bits": 256,
+      "wide_handshakes": 28372,
+      "wide_vcd_data_beats": 9669,
+      "width": 256,
+      "planes": 2,
+      "memory_completed": 9452,
+      "memory_errors": 0,
+      "target_reads": 201,
+      "target_writes": 9251,
+      "target_read_beats": 328,
+      "target_write_beats": 9341,
+      "tx_flits": 28112,
+      "rx_flits": 37566,
+      "forward_replays": 0,
+      "reverse_replays": 0,
+      "crc_errors": 0,
+      "order_violations": 0
+    },
+    "memsim_check": {
+      "passed": true,
+      "bursts": 9452,
+      "children": 9669,
+      "errors": 0,
+      "image_bytes": 75712,
+      "window_bytes": 4294967296,
+      "period_fs": 250000,
+      "commands": {
+        "REFpb": 412288,
+        "ACT": 299,
+        "WR": 9341,
+        "PREpb": 299,
+        "RD": 328
+      },
+      "dfi_data_events": 10103,
+      "submit_stalls": 882,
+      "response_stalls": 0
+    },
+    "memsim_core": {
+      "passed": true,
+      "submitted": 9669,
+      "returned": 9669,
+      "submit_stalls": 882,
+      "cycles": 12575194,
+      "commands": 422555,
+      "dfi_events": 432658,
+      "command_errors": 0,
+      "dfi_errors": 0
+    }
+  },
+  "wave": {
+    "custom": {
+      "passed": true,
+      "sampled_rising_edges": 1571900,
+      "handshakes": {
+        "AW": 9251,
+        "W": 9341,
+        "B": 9251,
+        "AR": 201,
+        "R": 328
+      },
+      "stalled_edges": {
+        "W": 23111,
+        "B": 5050,
+        "R": 274
+      },
+      "first_valid_ns": {
+        "wvalid": 2271350.0,
+        "awvalid": 2271356.0,
+        "bvalid": 2271402.0,
+        "arvalid": 2908584.0,
+        "rvalid": 2908630.0
+      },
+      "ready_transitions": {
+        "arready": 2,
+        "awready": 2,
+        "bready": 628757,
+        "rready": 449113,
+        "wready": 18431
+      },
+      "first_handshake_ns": {
+        "AW": 2271358.0,
+        "W": 2271362.0,
+        "B": 2271404.0,
+        "AR": 2908586.0,
+        "R": 2908632.0
+      },
+      "checked": [
+        "VCD/CSV equality",
+        "VALID/payload hold",
+        "clocked output transitions",
+        "BVALID after AW/all W",
+        "RVALID after AR",
+        "WLAST/RLAST",
+        "drained"
+      ]
+    }
+  },
+  "scope": "accelerator -> native AXI256 -> AXI2Flit -> UCIe -> online mem_sim -> returned data",
+  "custom": {
+    "passed": true,
+    "checked_words": 1
+  },
+  "soc": {
+    "passed": true,
+    "mode": "gem5 syscall emulation with x86 MMU and emulated process page tables",
+    "host": {
+      "clock_mhz": 2000,
+      "num_cpus": 4,
+      "l1i": "32KiB",
+      "l1d": "32KiB",
+      "l2": "1MiB",
+      "tlb_entries": 64
+    },
+    "gpu": {
+      "clock_mhz": 1000,
+      "cores": 2,
+      "warps": 4,
+      "threads": 4,
+      "l1i_bytes": 16384,
+      "l1d_bytes": 16384,
+      "l2_enabled": false,
+      "l2_bytes": 1048576
+    },
+    "translation_samples": 128,
+    "non_identity_samples": 128,
+    "example": {
+      "context": "0",
+      "tlb": "systemc_kernel.system.cpu0.mmu.itb",
+      "virtual_address": "140737354261824",
+      "physical_address": "2147632448",
+      "mode": "2",
+      "tick_fs": "0"
+    },
+    "cache_tlb_statistics": {
+      "systemc_kernel.system.cpu0.dcache.demandHits::total": 837532.0,
+      "systemc_kernel.system.cpu0.dcache.demandMisses::total": 20657.0,
+      "systemc_kernel.system.cpu0.dcache.demandAccesses::total": 858189.0,
+      "systemc_kernel.system.cpu0.icache.demandHits::total": 3087383.0,
+      "systemc_kernel.system.cpu0.icache.demandMisses::total": 3995.0,
+      "systemc_kernel.system.cpu0.icache.demandAccesses::total": 3091378.0,
+      "systemc_kernel.system.cpu1.dcache.demandHits::total": 11650.0,
+      "systemc_kernel.system.cpu1.dcache.demandMisses::total": 347.0,
+      "systemc_kernel.system.cpu1.dcache.demandAccesses::total": 11997.0,
+      "systemc_kernel.system.cpu1.icache.demandHits::total": 33011.0,
+      "systemc_kernel.system.cpu1.icache.demandMisses::total": 494.0,
+      "systemc_kernel.system.cpu1.icache.demandAccesses::total": 33505.0,
+      "systemc_kernel.system.l2cache.demandHits::total": 10965.0,
+      "systemc_kernel.system.l2cache.demandMisses::total": 14277.0,
+      "systemc_kernel.system.l2cache.demandAccesses::total": 25242.0
+    }
+  },
+  "gpu_memory_order": {
+    "passed": true,
+    "checked_dependencies": 2,
+    "core_requests": 8
+  },
+  "raw_result_directory": "../../.cache/tutorial-project/my_smoke/result/custom"
+}

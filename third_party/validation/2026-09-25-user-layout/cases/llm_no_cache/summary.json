@@ -1,0 +1,283 @@
+{
+  "passed": true,
+  "device": "vortex",
+  "benchmark": {
+    "name": "tiny_llm",
+    "prompt": "red ",
+    "generated_tokens": 3,
+    "kv_cache": false
+  },
+  "axi_data_bits": 256,
+  "completion": {
+    "cause": "exiting with last active thread context",
+    "code": 0,
+    "tick_fs": 4786484500000,
+    "passed": true
+  },
+  "sources": {
+    "vortex": {
+      "transactions": 11303,
+      "bytes": 720376,
+      "roundtrip_mean_ns": 84.4000265416261
+    },
+    "host": {
+      "transactions": 11893,
+      "bytes": 95136,
+      "roundtrip_mean_ns": 62.60447321954091
+    }
+  },
+  "devices": {
+    "core_read": 319,
+    "core_write": 10060,
+    "cp_read": 52,
+    "cp_write": 52,
+    "completed": 10483,
+    "cp_cycles": 868073,
+    "cycles": 867871
+  },
+  "checks": {
+    "check_summary": {
+      "passed": true,
+      "axi_data_bits": 256,
+      "transactions": 23190,
+      "axi_handshakes": 78838,
+      "max_tlm_latency_ns": 428.0,
+      "coverage": {
+        "narrow_bursts": 11945,
+        "full_width_bursts": 11251,
+        "bursts_256_beats": 0,
+        "masked_write_beats": 20120,
+        "aw_before_w": 21194,
+        "w_before_aw": 0,
+        "error_responses": 0,
+        "checked_read_bytes": 59356
+      }
+    },
+    "aou_check_summary": {
+      "passed": true,
+      "master_data_bits": 256,
+      "wide_handshakes": 78838,
+      "wide_vcd_data_beats": 34448,
+      "width": 256,
+      "planes": 2,
+      "memory_completed": 23196,
+      "memory_errors": 0,
+      "target_reads": 2002,
+      "target_writes": 21194,
+      "target_read_beats": 2780,
+      "target_write_beats": 31668,
+      "tx_flits": 76158,
+      "rx_flits": 99927,
+      "forward_replays": 0,
+      "reverse_replays": 0,
+      "crc_errors": 0,
+      "order_violations": 0
+    },
+    "memsim_check": {
+      "passed": true,
+      "bursts": 23196,
+      "children": 34444,
+      "errors": 0,
+      "image_bytes": 112800,
+      "window_bytes": 4294967296,
+      "period_fs": 250000,
+      "commands": {
+        "REFpb": 627728,
+        "ACT": 932,
+        "WR": 31668,
+        "PREpb": 932,
+        "RD": 2776
+      },
+      "dfi_data_events": 56942,
+      "submit_stalls": 1012,
+      "response_stalls": 19
+    },
+    "memsim_core": {
+      "passed": true,
+      "submitted": 34444,
+      "returned": 34444,
+      "submit_stalls": 1012,
+      "cycles": 19145938,
+      "commands": 664036,
+      "dfi_events": 720978,
+      "command_errors": 0,
+      "dfi_errors": 0
+    }
+  },
+  "wave": {
+    "llm_no_cache": {
+      "passed": true,
+      "sampled_rising_edges": 2393243,
+      "handshakes": {
+        "AW": 21194,
+        "W": 31668,
+        "B": 21194,
+        "AR": 2002,
+        "R": 2780
+      },
+      "stalled_edges": {
+        "W": 51925,
+        "B": 11219,
+        "R": 2672
+      },
+      "first_valid_ns": {
+        "wvalid": 2271452.0,
+        "awvalid": 2271458.0,
+        "bvalid": 2271504.0,
+        "arvalid": 2908584.0,
+        "rvalid": 2908630.0
+      },
+      "ready_transitions": {
+        "arready": 2,
+        "awready": 2,
+        "bready": 957294,
+        "rready": 683782,
+        "wready": 40517
+      },
+      "first_handshake_ns": {
+        "AW": 2271460.0,
+        "W": 2271464.0,
+        "B": 2271506.0,
+        "AR": 2908586.0,
+        "R": 2908632.0
+      },
+      "checked": [
+        "VCD/CSV equality",
+        "VALID/payload hold",
+        "clocked output transitions",
+        "BVALID after AW/all W",
+        "RVALID after AR",
+        "WLAST/RLAST",
+        "drained"
+      ]
+    }
+  },
+  "scope": "accelerator -> native AXI256 -> AXI2Flit -> UCIe -> online mem_sim -> returned data",
+  "llm": {
+    "passed": true,
+    "model_version": "tiny-char-trained-v1",
+    "model_parameters": 1001,
+    "architecture": {
+      "dim": 8,
+      "heads": 2,
+      "hidden_dim": 16,
+      "layers": 1,
+      "context_length": 16,
+      "vocab_size": 17,
+      "normalization": "layernorm",
+      "epsilon": 1e-05,
+      "activation": "relu"
+    },
+    "prompt": "red ",
+    "prompt_tokens": [
+      13,
+      7,
+      6,
+      1
+    ],
+    "generated_token_ids": [
+      4,
+      10,
+      15
+    ],
+    "generated_text": "blu",
+    "kv_cache": false,
+    "processed_token_positions": 6,
+    "forward_calls": 15,
+    "verified_float_values": 1126,
+    "checked_values_by_stage": {
+      "kv_k": 128,
+      "kv_v": 128,
+      "embedding": 48,
+      "norm1": 48,
+      "q": 48,
+      "k": 48,
+      "v": 48,
+      "attention": 192,
+      "attention_output": 48,
+      "residual": 48,
+      "norm2": 48,
+      "ff": 96,
+      "hidden": 48,
+      "norm_final": 48,
+      "logits": 102
+    },
+    "maximum_absolute_error_by_stage": {
+      "kv_k": 3.4483358568593303e-07,
+      "kv_v": 2.5491846011860275e-07,
+      "embedding": 5.960464477539063e-08,
+      "norm1": 1.721033395796212e-07,
+      "q": 2.3672090021520376e-07,
+      "k": 3.4483358568593303e-07,
+      "v": 2.5491846011860275e-07,
+      "attention": 1.4102632289736405e-07,
+      "attention_output": 3.582337311236472e-07,
+      "residual": 3.377446344821067e-07,
+      "norm2": 4.263624076017436e-07,
+      "ff": 4.570297549300051e-07,
+      "hidden": 6.476731932991697e-07,
+      "norm_final": 1.2416641768098202e-06,
+      "logits": 3.418330661197899e-06
+    },
+    "numeric_tolerance": {
+      "absolute": 2e-05,
+      "relative": 2e-05
+    },
+    "scope": "Actual GPU output and online memory; independent full-prefix FP64 reference"
+  },
+  "soc": {
+    "passed": true,
+    "mode": "gem5 syscall emulation with x86 MMU and emulated process page tables",
+    "host": {
+      "clock_mhz": 2000,
+      "num_cpus": 4,
+      "l1i": "32KiB",
+      "l1d": "32KiB",
+      "l2": "1MiB",
+      "tlb_entries": 64
+    },
+    "gpu": {
+      "clock_mhz": 1000,
+      "cores": 2,
+      "warps": 4,
+      "threads": 4,
+      "l1i_bytes": 16384,
+      "l1d_bytes": 16384,
+      "l2_enabled": false,
+      "l2_bytes": 1048576
+    },
+    "translation_samples": 128,
+    "non_identity_samples": 128,
+    "example": {
+      "context": "0",
+      "tlb": "systemc_kernel.system.cpu0.mmu.itb",
+      "virtual_address": "140737354261824",
+      "physical_address": "2147632448",
+      "mode": "2",
+      "tick_fs": "0"
+    },
+    "cache_tlb_statistics": {
+      "systemc_kernel.system.cpu0.dcache.demandHits::total": 1134644.0,
+      "systemc_kernel.system.cpu0.dcache.demandMisses::total": 21809.0,
+      "systemc_kernel.system.cpu0.dcache.demandAccesses::total": 1156453.0,
+      "systemc_kernel.system.cpu0.icache.demandHits::total": 3879518.0,
+      "systemc_kernel.system.cpu0.icache.demandMisses::total": 4164.0,
+      "systemc_kernel.system.cpu0.icache.demandAccesses::total": 3883682.0,
+      "systemc_kernel.system.cpu1.dcache.demandHits::total": 368036.0,
+      "systemc_kernel.system.cpu1.dcache.demandMisses::total": 564.0,
+      "systemc_kernel.system.cpu1.dcache.demandAccesses::total": 368600.0,
+      "systemc_kernel.system.cpu1.icache.demandHits::total": 1109417.0,
+      "systemc_kernel.system.cpu1.icache.demandMisses::total": 502.0,
+      "systemc_kernel.system.cpu1.icache.demandAccesses::total": 1109919.0,
+      "systemc_kernel.system.l2cache.demandHits::total": 11753.0,
+      "systemc_kernel.system.l2cache.demandMisses::total": 14553.0,
+      "systemc_kernel.system.l2cache.demandAccesses::total": 26306.0
+    }
+  },
+  "gpu_memory_order": {
+    "passed": true,
+    "checked_dependencies": 9983,
+    "core_requests": 10379
+  },
+  "raw_result_directory": "../../../user/llm/result/test-20260925-214647/llm_no_cache"
+}

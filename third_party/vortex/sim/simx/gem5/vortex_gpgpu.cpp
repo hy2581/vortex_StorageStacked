@@ -288,8 +288,10 @@ extern "C" {
 const char* vortex_gem5_build_info(void) {
     static char info[256];
     std::snprintf(info, sizeof(info),
-                  "vortex-gem5 (XLEN=%d, threads=%d, warps=%d, cores=%d, clusters=%d)",
-                  VX_CFG_XLEN, VX_CFG_NUM_THREADS, VX_CFG_NUM_WARPS, VX_CFG_NUM_CORES, VX_CFG_NUM_CLUSTERS);
+                  "vortex-gem5 (XLEN=%d, threads=%d, warps=%d, cores=%d, clusters=%d) "
+                  "cache(ICACHE=%d, DCACHE=%d, L2_ENABLED=%d, L2_SIZE=%d)",
+                  VX_CFG_XLEN, VX_CFG_NUM_THREADS, VX_CFG_NUM_WARPS, VX_CFG_NUM_CORES, VX_CFG_NUM_CLUSTERS,
+                  VX_CFG_ICACHE_SIZE, VX_CFG_DCACHE_SIZE, VX_CFG_L2_ENABLED, VX_CFG_L2_SIZE);
     return info;
 }
 

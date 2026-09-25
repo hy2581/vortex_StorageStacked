@@ -1,0 +1,10 @@
+Import('*')
+import os
+import runpy
+storage = os.path.join(os.environ['STORAGE_STACK_ROOT'], 'storage_axi')
+env.Append(CPPPATH=[Dir('#/src/systemc/ext'), storage,
+                   os.path.join(storage, '../axi2flit/systemc/include')])
+link_defines = runpy.run_path(os.path.join(storage, 'link_options.py'))['definitions']()
+SimObject('StorageBridge.py', sim_objects=['StorageBridge'])
+Source('axi_master.cc')
+Source('storage.cc', append={'CPPDEFINES': link_defines})

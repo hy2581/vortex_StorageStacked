@@ -121,6 +121,19 @@ public:
 			auto& mem_req = mem_xbar_->ReqOut.at(i).peek();
 
 			if (external_issue_hook_) {
+				// The local RAM applies writes before subsequent reads. Preserve
+				// that order when independent external read/write channels overlap.
+				const auto block = mem_req.addr / config_.block_size;
+				bool conflict = false;
+				for (const auto& entry : external_pending_) {
+					const auto& older = entry.second.request;
+					if (older.addr / config_.block_size == block &&
+					    (older.is_write() || mem_req.is_write())) {
+						conflict = true;
+						break;
+					}
+				}
+				if (conflict) continue;
 				const uint64_t token = next_external_token_++;
 				std::shared_ptr<mem_block_t> rsp_data;
 				if (!mem_req.is_write()) rsp_data = make_mem_block();

@@ -1,0 +1,32 @@
+"""Negative acceptance: reject invalid settings and corrupted device outputs."""
+import copy,json,struct
+from pathlib import Path
+from configure import validate
+from verify_compute import readback,check_outputs
+from llm_model import WEIGHTS,KEY_CACHE,TRACE,REPORT
+
+
+def check(smoke=None,llm=None):
+    result={}
+    def reject(name,fn):
+        try:fn()
+        except (AssertionError,ValueError,KeyError,TypeError):result[name]=True
+        else:raise AssertionError('Did not reject '+name)
+    root=smoke or llm;config=json.loads((root/'input.json').read_text())
+    for group,key,value in [('gpu','cores',3),('gpu','l1i_bytes',5000),('host','num_cpus',0),('host','l2','3KiB'),('host','tlb_entries',0),('axi','outstanding',0),('axi','period_ns',True),('axi','replay','yes'),('ucie','lanes',0),('ucie','bits_per_symbol',3),('ucie','rate_gtps',0),('memsim','standard','unknown'),('memsim','slots',1024),('simulation','max_ticks',0)]:
+        c=copy.deepcopy(config);c[group][key]=value;reject(group+'.'+key,lambda c=c:validate(c))
+    if smoke:
+        c=json.loads((smoke/'resolved.json').read_text());memory=readback(smoke)
+        for name,address in [('smoke_output',KEY_CACHE),('smoke_status',REPORT+12)]:
+            bad=memory.copy();bad[address]^=1;reject(name,lambda bad=bad:check_outputs(c,bad))
+    if llm:
+        c=json.loads((llm/'resolved.json').read_text());memory=readback(llm)
+        for name,address in [('weight',WEIGHTS),('kv',KEY_CACHE),('intermediate',TRACE),('generated_token',REPORT+64),('forward_count',REPORT+384)]:
+            bad=memory.copy()
+            if name in ('kv','intermediate'):
+                value=struct.unpack('<f',bytes(bad[address+i] for i in range(4)))[0]+1
+                bad.update({address+i:b for i,b in enumerate(struct.pack('<f',value))})
+            else:bad[address]^=1
+            reject(name,lambda bad=bad:check_outputs(c,bad))
+        bad=memory.copy();del bad[TRACE];reject('missing_output',lambda:check_outputs(c,bad))
+    return {'passed':True,'checks':result}
