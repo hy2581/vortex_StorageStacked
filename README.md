@@ -34,7 +34,7 @@ Vortex 的可选工艺库、无关系统包和大型 OpenCL 数据集不属于�
 3. [当前 LLM 负载状态与计算位置](docs/03-llm-workload-status.md)
 
 ```bash
-cd /home/hy258/hy/zhongxing/vortex_StorageStacked
+# 在 vortex_StorageStacked 仓库根目录执行
 ./run.sh check
 ./run.sh run
 ```
@@ -86,7 +86,7 @@ threads = 4
 ./run.sh test
 ```
 
-所有路径参数均可使用绝对路径；benchmark 的相对路径相对于本工程根目录，
+命令示例统一使用相对路径；benchmark 的相对路径相对于本工程根目录，
 `--output` 的相对路径相对于调用命令时的工作目录。
 
 GPU 编译参数或 SimX 高级默认值改变时，run 自动构建设备与全部已接入内核。
@@ -121,7 +121,8 @@ SimX 缓存之后的外部请求通过适配层调用 gem5 `dmaRead` / `dmaWrite
 | `build/`、`results/` | 编译产物和实际运行证据 |
 
 两个驱动互不链接，均通过公共 AXI256 端口驱动同一份 `axi_StorageStacked` 源码。
-默认依赖路径为 `../axi_StorageStacked`；不同目录可用 `export STORAGE_STACK_ROOT=/绝对路径/axi_StorageStacked` 指定。
+默认依赖路径为 `../axi_StorageStacked`；其他位置可在仓库根目录使用
+`export STORAGE_STACK_ROOT=../其他目录/axi_StorageStacked` 指定，然后从该目录执行构建和运行。
 切换公共项目路径或版本后必须重新 build；运行入口会拒绝路径与构建记录不一致的二进制。
 依赖声明在 `config/storage_dependency.json`，每次运行在 `environment.json` 记录公共项目版本/提交号。
 内存库分别编译到各驱动的 `build/memsim/`，不会共用另一个驱动的二进制。
