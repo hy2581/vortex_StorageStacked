@@ -17,6 +17,7 @@ if o.project in (None,'smoke'):
     add('smoke','smoke',{})
     add('smoke_slow','smoke',{'memsim':{'scale':4}})
     add('smoke_wrap','smoke',{'program':{'input':0xffffffff}})
+    add('smoke_cpu2','smoke',{'host':{'num_cpus':2}})
 if o.project in (None,'llm'):
     add('llm','llm',{})
     add('llm_no_cache','llm',{'program':{'kv_cache':False}})
@@ -42,6 +43,11 @@ try:
         finished.append(run(cases[-1]))
     by_name={name:(result,s) for name,result,s in finished}
     checks={}
+    if 'smoke_cpu2' in by_name:
+        base=by_name['smoke'][1]['host_execution'];two=by_name['smoke_cpu2'][1]['host_execution']
+        assert base['active_cpus']==base['configured_cpus'] and two['active_cpus']==2
+        assert by_name['smoke'][1]['smoke']['output']==by_name['smoke_cpu2'][1]['smoke']['output']
+        checks['cpu_multicore']={'passed':True,'default_active_cpus':base['active_cpus'],'alternate_active_cpus':two['active_cpus']}
     if 'smoke_slow' in by_name:
         fast=by_name['smoke'][1];slow=by_name['smoke_slow'][1]
         assert slow['devices']['cycles']>fast['devices']['cycles'],'Memory slowdown did not reach GPU execution'
@@ -58,7 +64,7 @@ try:
     s={'passed':True,'native_tests_passed':len(native_plan['tests']),'api_check':json.loads((output/'api/api_check.json').read_text()),'negative':negative,'comparisons':checks,'cases':{}}
     for name,result,item in finished:
         value=item['smoke']['output'] if 'smoke' in item else item['llm']['generated_text']
-        s['cases'][name]={'passed':True,'output':value,'cycles':item['devices']['cycles'],'report':relative(result/'report.md',output)}
+        s['cases'][name]={'passed':True,'output':value,'cycles':item['devices']['cycles'],'active_cpus':item['host_execution']['active_cpus'],'cpu_instructions':[core['instructions'] for core in item['host_execution']['cores']],'report':relative(result/'report.md',output)}
     dump(output/'summary.json',s);write_report(output);print('PASS:',relative(output/'report.md'))
 except Exception as error:
     write_status(output,'regression',str(error));raise

@@ -134,16 +134,12 @@ static unsigned forward(unsigned pos) {
     return best;
 }
 __kernel void kernel_main() {
-    // 1. 将模型与输入写入外部内存，并初始化 KV cache。
+    // 1. CPU 已上传模型与输入；GPU 初始化 KV cache。
     report[0] = 0x4c4c4d31u;
-    for (unsigned i = 0; i < LLM_WEIGHT_WORDS; ++i)
-        weights[i] = model_image[i];
     for (unsigned i = 0; i < LLM_CONTEXT * LLM_DIM; ++i) {
         keys[i] = 0.0f;
         values[i] = 0.0f;
     }
-    for (unsigned i = 0; i < LLM_PROMPT_LENGTH; ++i)
-        tokens[i] = prompt_image[i];
     report[1] = 1;
     // 2. 第一轮处理整个 prompt（prefill），后续按 KV cache 开关选择计算范围。
     for (unsigned step = 0; step < LLM_GENERATE; ++step) {

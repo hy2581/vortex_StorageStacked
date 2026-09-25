@@ -24,6 +24,15 @@ def write_report(root):
               f"{r['model_parameters']} 个参数；KV cache={r['kv_cache']}；前向位置计算 {r['forward_calls']} 次。权重、KV、中间结果、token 和完成状态已逐项核对。",'',
               '数值核对见 [llm_summary.json](llm_summary.json)。','']
         if 'custom' in s:lines+=['自定义输出字均与配置中的期望值一致。','']
+        host=s['host_execution']
+        lines += [f"gem5 CPU 实际执行：{host['active_cpus']} / {host['configured_cpus']} 核。",'',
+                  '| CPU 核 | 提交指令数 | L1I 访问 | L1D 访问 | MMU 样本 |',
+                  '|---|---:|---:|---:|---:|']
+        for core in host['cores']:
+            lines.append(f"| CPU{core['cpu']} | {core['instructions']} | {core['l1i_accesses']} | {core['l1d_accesses']} | {core['translation_samples']} |")
+        host_sources=', '.join(host['programs']['host']['sources']);device_sources=', '.join(host['programs']['device']['sources'])
+        lines += ['', f'CPU 运行 `{host_sources} → host.elf`；Vortex 运行 `{device_sources} → program.elf / program.vxbin`。实际源码清单见 [programs.json](build/programs.json)，本次源码保存在 `build/sources/`。', '',
+                  'CPU 线程分片及结果检查见 [host_summary.json](host_summary.json)。各核活动表示实际执行，不代表线性加速。', '']
         lines+=['地址转换见 [mmu_translations.csv](mmu_translations.csv)，缓存/TLB 统计见 [soc_summary.json](soc_summary.json)。', '',
                 '链路视图：[memsim_view.html](memsim_view.html)；实际配置：[resolved.json](resolved.json)。', '',
                 '原始证据：axi_wave.vcd、axi_events.csv、ucie_flits.csv、memsim_bridge.csv、hettrace/。所有周期与延迟均为仿真值。']

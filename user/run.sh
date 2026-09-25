@@ -85,7 +85,7 @@ system=$(<"$result_dir/build/system.path")
 flock -s 9
 
 stage=simulate
-printf '[2/3] 运行 program.elf\n'
+printf '[2/3] gem5 运行 host.elf，Vortex 执行 program.vxbin\n'
 "$AXI_PYTHON" "$runtime/session.py" status "$result_dir" "$stage"
 (cd -- "$result_dir" && "$simulator" --listener-mode=off -d . "$system" --config resolved.json) >"$result_dir/run.log" 2>&1
 

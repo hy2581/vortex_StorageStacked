@@ -4,6 +4,7 @@ from pathlib import Path
 from configure import validate
 from verify_compute import readback,check_outputs
 from llm_model import WEIGHTS,KEY_CACHE,TRACE,REPORT
+from verify_host import check_execution
 
 
 def check(smoke=None,llm=None):
@@ -13,6 +14,15 @@ def check(smoke=None,llm=None):
         except (AssertionError,ValueError,KeyError,TypeError):result[name]=True
         else:raise AssertionError('Did not reject '+name)
     root=smoke or llm;config=json.loads((root/'input.json').read_text())
+    resolved=json.loads((root/'resolved.json').read_text())
+    evidence=json.loads((root/'host_summary.json').read_text())
+    for name in ('idle_cpu','missing_worker','duplicate_thread','work_partition'):
+        bad=copy.deepcopy(evidence)
+        if name=='idle_cpu':bad['cores'][-1]['instructions']=0
+        elif name=='missing_worker':bad['phases']['prepare'].pop()
+        elif name=='duplicate_thread':bad['phases']['prepare'][1]['tid']=bad['phases']['prepare'][0]['tid']
+        else:bad['phases']['check'][0]['end']+=1
+        reject(name,lambda bad=bad:check_execution(bad,resolved))
     for group,key,value in [('gpu','cores',3),('gpu','l1i_bytes',5000),('host','num_cpus',0),('host','l2','3KiB'),('host','tlb_entries',0),('axi','outstanding',0),('axi','period_ns',True),('axi','replay','yes'),('ucie','lanes',0),('ucie','bits_per_symbol',3),('ucie','rate_gtps',0),('memsim','standard','unknown'),('memsim','slots',1024),('simulation','max_ticks',0)]:
         c=copy.deepcopy(config);c[group][key]=value;reject(group+'.'+key,lambda c=c:validate(c))
     if smoke:

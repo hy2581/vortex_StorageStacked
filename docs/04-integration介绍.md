@@ -56,7 +56,7 @@ flowchart LR
 
 ## 3. system.py
 
-读取本次 `resolved.json`，调用平台创建 CPU、MMU、缓存、GPU，再连接公共存储桥。流程为：
+读取本次 `resolved.json`，调用平台创建 CPU、MMU、缓存、GPU，再连接公共存储桥。`host_binary` 指向 CPU 执行的 `host.elf`，`kernel` 指向主机要加载的 `program.vxbin`；CPU/GPU 两份用户源码分别在项目的 `src/host.cpp`、`src/kernel.cpp`。流程为：
 
 1. 创建 gem5/Vortex 平台，统一时间单位为 1 fs。
 2. 配置存储窗口、AXI 时钟和 MEMSIM 参数。

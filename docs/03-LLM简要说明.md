@@ -8,11 +8,12 @@ user/llm/
 ├── src/
 │   ├── Makefile
 │   ├── tinyllm.h
-│   └── tinyllm.cpp
+│   ├── host.cpp
+│   └── kernel.cpp
 └── result/
 ```
 
-`tinyllm.h` 保存模型参数、权重、词表和布局；`tinyllm.cpp` 执行推理；Makefile 声明两者。模型与 CoralNPU 示例一致，计算流程也保持对应，设备入口和数学函数使用 Vortex SDK。
+`host.cpp` 在 gem5 的 CPU 上分片准备权重、上传权重和 prompt、启动 GPU 并回读检查；`kernel.cpp` 在 Vortex 上执行推理；`tinyllm.h` 保存模型参数、权重、词表和布局。Makefile 分别声明主机与设备源码。模型与 CoralNPU 示例一致，计算流程也保持对应，设备入口和数学函数使用 Vortex SDK。
 
 模型为单层字符 Transformer：1001 个参数，隐藏维度 8、2 个注意力头、FFN 维度 16、上下文 16、词表 17。头文件中权重按对齐布局保存，共 1004 个 float。用户不需要下载模型、运行训练程序或生成权重文件。
 
@@ -33,7 +34,8 @@ user/llm/
 
 ```mermaid
 flowchart TD
-    A[权重和 prompt 初始化] --> B[Token 与位置嵌入]
+    A[CPU 多线程准备权重 / 主线程上传模型与 prompt] --> K0[GPU 初始化 KV cache]
+    K0 --> B[Token 与位置嵌入]
     B --> C[LayerNorm]
     C --> D[Q/K/V 矩阵向量乘]
     D --> E[写入并读取 KV cache]
@@ -47,7 +49,7 @@ flowchart TD
     K -- 是 --> L[报告 token 与完成状态]
 ```
 
-程序分三段：初始化模型和外部缓冲区；第一轮 prefill、后续 decode；写入结果和完成状态。`forward()` 包含一整个位置的计算，`norm()`、`linear()` 等小函数对应基本算子。
+CPU 程序负责准备和传输输入；GPU 程序分三段：初始化 KV cache；第一轮 prefill、后续 decode；写入结果和完成状态。`forward()` 包含一整个位置的计算，`norm()`、`linear()` 等小函数对应基本算子。
 
 开启 KV cache 后，第一轮处理完整 prompt，后续每轮只计算新位置。关闭后每轮重算当前前缀。两种方式应生成相同 token，可用来观察访存和执行周期差异。
 
@@ -90,9 +92,9 @@ cat llm/result/first/llm_summary.json
 
 ```mermaid
 flowchart LR
-    A[config.json + tinyllm.h/.cpp] --> B[项目 Makefile]
-    B --> C[设备程序与模型元数据]
-    C --> D[gem5 主机加载和发射]
+    A[config.json + host.cpp + kernel.cpp + tinyllm.h] --> B[项目 Makefile]
+    B --> C[host.elf 与 program.elf / program.vxbin]
+    C --> D[gem5 CPU 多线程准备 / 上传 / 发射]
     D --> E[Vortex 执行真实推理]
     E <--> F[integration 的 TLM→AXI]
     F <--> G[公共 UCIe / MEMSIM]
@@ -102,3 +104,5 @@ flowchart LR
     I --> J
     J --> K[result 中的报告]
 ```
+
+`host.cpp` 中的 `on_cpu_cores()` 使用 `std::thread` 和屏障；默认四个线程分别准备及检查 1004 个权重存储字的一部分。推理仍由 GPU 完成。报告中的 CPU 每核统计来自 gem5，线程任务边界来自实际主机程序；`host_summary.json` 将二者放在一起检查。

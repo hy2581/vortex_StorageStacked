@@ -1,0 +1,153 @@
+{
+  "passed": true,
+  "output": 42,
+  "gpu_cycles": 1139,
+  "active_cpus": 2,
+  "cpu_instructions": [
+    2356535,
+    38780
+  ],
+  "axi_handshakes": 28458,
+  "raw_result_directory": "../../../user/smoke/result/test-20260926-010024/smoke_cpu2",
+  "record": "cases/smoke_cpu2/summary.json",
+  "completion": {
+    "cause": "exiting with last active thread context",
+    "code": 0,
+    "tick_fs": 3202323000000,
+    "passed": true
+  },
+  "sources": {
+    "vortex": {
+      "transactions": 267,
+      "bytes": 14608,
+      "roundtrip_mean_ns": 122.57303370786516
+    },
+    "host": {
+      "transactions": 9216,
+      "bytes": 73720,
+      "roundtrip_mean_ns": 62.956217447916664
+    }
+  },
+  "checks": {
+    "check_summary": {
+      "passed": true,
+      "axi_data_bits": 256,
+      "transactions": 9483,
+      "axi_handshakes": 28458,
+      "max_tlm_latency_ns": 350.0,
+      "coverage": {
+        "narrow_bursts": 9261,
+        "full_width_bursts": 222,
+        "bursts_256_beats": 0,
+        "masked_write_beats": 10,
+        "aw_before_w": 9270,
+        "w_before_aw": 0,
+        "error_responses": 0,
+        "checked_read_bytes": 9052
+      }
+    },
+    "aou_check_summary": {
+      "passed": true,
+      "master_data_bits": 256,
+      "wide_handshakes": 28458,
+      "wide_vcd_data_beats": 9705,
+      "width": 256,
+      "planes": 2,
+      "memory_completed": 9483,
+      "memory_errors": 0,
+      "target_reads": 213,
+      "target_writes": 9270,
+      "target_read_beats": 344,
+      "target_write_beats": 9361,
+      "tx_flits": 28185,
+      "rx_flits": 37698,
+      "forward_replays": 0,
+      "reverse_replays": 0,
+      "crc_errors": 0,
+      "order_violations": 0
+    },
+    "memsim_check": {
+      "passed": true,
+      "bursts": 9483,
+      "children": 9705,
+      "errors": 0,
+      "image_bytes": 75584,
+      "window_bytes": 4294967296,
+      "period_fs": 250000,
+      "commands": {
+        "REFpb": 419968,
+        "ACT": 305,
+        "WR": 9361,
+        "PREpb": 305,
+        "RD": 344
+      },
+      "dfi_data_events": 10149,
+      "submit_stalls": 31,
+      "response_stalls": 0
+    },
+    "memsim_core": {
+      "passed": true,
+      "submitted": 9705,
+      "returned": 9705,
+      "submit_stalls": 31,
+      "cycles": 12809292,
+      "commands": 430283,
+      "dfi_events": 440432,
+      "command_errors": 0,
+      "dfi_errors": 0
+    }
+  },
+  "gpu_memory_order": {
+    "passed": true,
+    "checked_dependencies": 5,
+    "core_requests": 13
+  },
+  "wave": {
+    "smoke_cpu2": {
+      "passed": true,
+      "sampled_rising_edges": 1601162,
+      "handshakes": {
+        "AW": 9270,
+        "W": 9361,
+        "B": 9270,
+        "AR": 213,
+        "R": 344
+      },
+      "stalled_edges": {
+        "W": 23100,
+        "B": 5115,
+        "R": 263
+      },
+      "first_valid_ns": {
+        "wvalid": 2320494.0,
+        "awvalid": 2320500.0,
+        "bvalid": 2320546.0,
+        "arvalid": 2957724.0,
+        "rvalid": 2957770.0
+      },
+      "ready_transitions": {
+        "arready": 2,
+        "awready": 2,
+        "bready": 640462,
+        "rready": 457474,
+        "wready": 18479
+      },
+      "first_handshake_ns": {
+        "AW": 2320502.0,
+        "W": 2320506.0,
+        "B": 2320548.0,
+        "AR": 2957726.0,
+        "R": 2957772.0
+      },
+      "checked": [
+        "VCD/CSV equality",
+        "VALID/payload hold",
+        "clocked output transitions",
+        "BVALID after AW/all W",
+        "RVALID after AR",
+        "WLAST/RLAST",
+        "drained"
+      ]
+    }
+  }
+}

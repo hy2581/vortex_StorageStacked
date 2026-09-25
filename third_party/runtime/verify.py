@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import sys
 from verify_compute import verify as verify_compute
+from verify_host import verify as verify_host
 from report import write_report
 from paths import dump
 from hettrace import addrmap
@@ -149,6 +150,7 @@ def verify(root):
     result = {'passed': True, 'device': dev, 'benchmark': b, 'axi_data_bits': read(root / 'protocol_summary.json')['axi_data_bits'], 'completion': completion, 'sources': sources, 'devices': devices, 'checks': checks, 'wave': wave, 'scope': 'accelerator -> native AXI256 -> AXI2Flit -> UCIe -> online mem_sim -> returned data'}
     assert result['axi_data_bits'] == 256
     result.update(compute);result['soc']=soc
+    result['host_execution']=verify_host(root,c)
     result['gpu_memory_order']={'passed':True,'checked_dependencies':ordered_dependencies,'core_requests':len(core_rows)}
     (root / 'summary.json').write_text(json.dumps(result, indent=2) + '\n')
     write_report(root)

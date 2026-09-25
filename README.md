@@ -10,8 +10,8 @@ vortex_StorageStacked/
 ├── build.sh
 ├── user/
 │   ├── run.sh
-│   ├── smoke/               config.json + src/Makefile、smoke.cpp + result/
-│   └── llm/                 config.json + src/Makefile、tinyllm.h/.cpp + result/
+│   ├── smoke/               config.json + src/Makefile、host.cpp、kernel.cpp + result/
+│   └── llm/                 config.json + src/Makefile、host.cpp、kernel.cpp、tinyllm.h + result/
 ├── docs/                    用户说明和研究成果分析
 ├── third_party/             gem5、Vortex、SDK、内部工具与构建缓存
 └── integration/             gem5/TLM 到公共 AXI 存储的桥接
@@ -40,10 +40,12 @@ cd user
 ./run.sh smoke --output result/my-check
 ```
 
-- **SMOKE**：默认输入 `41`，四个工作组分别写入、读回、加一，输出 `42`。
+- **SMOKE**：CPU 多线程准备默认输入 `41` 并上传，GPU 四个工作组分别读入、加一，CPU 回读检查输出 `42`。
 - **LLM**：与 CoralNPU 示例采用相同 TinyLLM 模型；输入 `"red "`，生成 `"blu"`，token ID `[4, 10, 15]`。
 
 每个项目只有一个 `config.json`。其中配置程序输入、GPU 核/warp/线程、CPU 核数、MMU/TLB、缓存、AXI、UCIe、MEMSIM 和仿真上限。修改后直接运行；需要更新的平台编译由入口处理。
+
+每个项目都包含明确的两类程序：`host.cpp → host.elf` 由 gem5 的 x86 CPU 执行，`kernel.cpp → program.elf / program.vxbin` 由 Vortex GPU 执行。CPU 核数控制示例的工作线程数；报告列出每核实际指令、缓存和 MMU 活动。CPU 核数、GPU 核数和 GPU 工作组数分别配置。
 
 新增项目遵循同样结构：`user/<项目>/config.json` 和 `src/Makefile`、源文件。`./run.sh <项目>` 不需要注册项目名，Makefile 通过 SDK 生成主机及设备程序。
 
@@ -61,7 +63,7 @@ cd user
 ./build.sh --test
 ```
 
-本次重构已完成 8 组平台场景、从零添加项目的 2 次运行、19 项原生测试、在线内存接口与 22 项错误拒绝检查。精简记录见 [重构验收](third_party/validation/2026-09-25-user-layout/README.md)。默认 SMOKE 为 `41 → 42`，TinyLLM 为 `"red " → "blu"`；慢内存、KV cache、重放及硬件参数变更均通过独立核对。
+CPU/GPU 程序拆分后已完成 9 组平台场景、2 次新建项目运行、19 项原生测试、在线内存接口与 26 项错误拒绝检查。最新记录见 [程序拆分与多核验收](third_party/validation/2026-09-26-host-device/README.md)。默认 SMOKE 为 `41 → 42`，TinyLLM 为 `"red " → "blu"`；四核/两核实际执行、慢内存、KV cache、重放及硬件参数变更均通过独立核对。早期目录布局验收保留在 [2026-09-25 记录](third_party/validation/2026-09-25-user-layout/README.md)。
 
 ## 运行链路
 
@@ -87,7 +89,7 @@ flowchart LR
 |---|---|
 | [用户环境配置说明](docs/01-用户环境配置说明.md) | 准备环境、全部参数、运行和输出 |
 | [从 0 添加 SMOKE 简要指南](docs/02-用户从0开始添加SMOKE简要指南.md) | 按步骤添加新项目，解释输入和输出 |
-| [LLM 简要说明](docs/03-LLM简要说明.md) | 两个源码文件、推理流程、KV 和数值核对 |
+| [LLM 简要说明](docs/03-LLM简要说明.md) | CPU/GPU 源码、推理流程、KV 和数值核对 |
 | [integration 介绍](docs/04-integration介绍.md) | 七个文件各自职责与流程图 |
 | [研究成果一分析](docs/05-研究成果一分析.md) | 三项目如何实现 SoC 模型各项内容 |
 

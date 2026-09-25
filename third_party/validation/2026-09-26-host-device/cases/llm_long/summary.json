@@ -1,0 +1,155 @@
+{
+  "passed": true,
+  "output": "blue",
+  "gpu_cycles": 761135,
+  "active_cpus": 4,
+  "cpu_instructions": [
+    3059767,
+    792076,
+    17463,
+    15430
+  ],
+  "axi_handshakes": 71454,
+  "raw_result_directory": "../../../user/llm/result/host-device-retry/llm_long",
+  "record": "cases/llm_long/summary.json",
+  "completion": {
+    "cause": "exiting with last active thread context",
+    "code": 0,
+    "tick_fs": 4914233000000,
+    "passed": true
+  },
+  "sources": {
+    "host": {
+      "transactions": 12726,
+      "bytes": 101808,
+      "roundtrip_mean_ns": 62.61822253653937
+    },
+    "vortex": {
+      "transactions": 8958,
+      "bytes": 570088,
+      "roundtrip_mean_ns": 89.07406787229291
+    }
+  },
+  "checks": {
+    "check_summary": {
+      "passed": true,
+      "axi_data_bits": 256,
+      "transactions": 21676,
+      "axi_handshakes": 71454,
+      "max_tlm_latency_ns": 472.0,
+      "coverage": {
+        "narrow_bursts": 12780,
+        "full_width_bursts": 8904,
+        "bursts_256_beats": 0,
+        "masked_write_beats": 15124,
+        "aw_before_w": 19186,
+        "w_before_aw": 0,
+        "error_responses": 0,
+        "checked_read_bytes": 66028
+      }
+    },
+    "aou_check_summary": {
+      "passed": true,
+      "master_data_bits": 256,
+      "wide_handshakes": 71454,
+      "wide_vcd_data_beats": 30584,
+      "width": 256,
+      "planes": 2,
+      "memory_completed": 21684,
+      "memory_errors": 0,
+      "target_reads": 2498,
+      "target_writes": 19186,
+      "target_read_beats": 3318,
+      "target_write_beats": 27266,
+      "tx_flits": 68693,
+      "rx_flits": 91208,
+      "forward_replays": 0,
+      "reverse_replays": 0,
+      "crc_errors": 0,
+      "order_violations": 0
+    },
+    "memsim_check": {
+      "passed": true,
+      "bursts": 21684,
+      "children": 30581,
+      "errors": 0,
+      "image_bytes": 110976,
+      "window_bytes": 4294967296,
+      "period_fs": 250000,
+      "commands": {
+        "REFpb": 644480,
+        "ACT": 896,
+        "WR": 27263,
+        "PREpb": 896,
+        "RD": 3318
+      },
+      "dfi_data_events": 48381,
+      "submit_stalls": 3511,
+      "response_stalls": 0
+    },
+    "memsim_core": {
+      "passed": true,
+      "submitted": 30581,
+      "returned": 30581,
+      "submit_stalls": 3511,
+      "cycles": 19656932,
+      "commands": 676853,
+      "dfi_events": 725234,
+      "command_errors": 0,
+      "dfi_errors": 0
+    }
+  },
+  "gpu_memory_order": {
+    "passed": true,
+    "checked_dependencies": 7443,
+    "core_requests": 7826
+  },
+  "wave": {
+    "llm_long": {
+      "passed": true,
+      "sampled_rising_edges": 2457117,
+      "handshakes": {
+        "AW": 19186,
+        "W": 27266,
+        "B": 19186,
+        "AR": 2498,
+        "R": 3318
+      },
+      "stalled_edges": {
+        "W": 47232,
+        "B": 10402,
+        "R": 3293
+      },
+      "first_valid_ns": {
+        "wvalid": 2329490.0,
+        "awvalid": 2329496.0,
+        "bvalid": 2329542.0,
+        "arvalid": 2966694.0,
+        "rvalid": 2966740.0
+      },
+      "ready_transitions": {
+        "arready": 2,
+        "awready": 2,
+        "bready": 982844,
+        "rready": 702032,
+        "wready": 36635
+      },
+      "first_handshake_ns": {
+        "AW": 2329498.0,
+        "W": 2329502.0,
+        "B": 2329544.0,
+        "AR": 2966696.0,
+        "R": 2966746.0
+      },
+      "checked": [
+        "VCD/CSV equality",
+        "VALID/payload hold",
+        "clocked output transitions",
+        "BVALID after AW/all W",
+        "RVALID after AR",
+        "WLAST/RLAST",
+        "drained"
+      ]
+    }
+  }
+}

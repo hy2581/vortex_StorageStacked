@@ -1,0 +1,78 @@
+{
+  "passed": true,
+  "model_version": "tiny-char-trained-v1",
+  "model_parameters": 1001,
+  "architecture": {
+    "dim": 8,
+    "heads": 2,
+    "hidden_dim": 16,
+    "layers": 1,
+    "context_length": 16,
+    "vocab_size": 17,
+    "normalization": "layernorm",
+    "epsilon": 1e-05,
+    "activation": "relu"
+  },
+  "prompt": "red blue ",
+  "prompt_tokens": [
+    13,
+    7,
+    6,
+    1,
+    4,
+    10,
+    15,
+    7,
+    1
+  ],
+  "generated_token_ids": [
+    4,
+    10,
+    15,
+    7
+  ],
+  "generated_text": "blue",
+  "kv_cache": true,
+  "processed_token_positions": 12,
+  "forward_calls": 12,
+  "verified_float_values": 1996,
+  "checked_values_by_stage": {
+    "kv_k": 128,
+    "kv_v": 128,
+    "embedding": 96,
+    "norm1": 96,
+    "q": 96,
+    "k": 96,
+    "v": 96,
+    "attention": 384,
+    "attention_output": 96,
+    "residual": 96,
+    "norm2": 96,
+    "ff": 192,
+    "hidden": 96,
+    "norm_final": 96,
+    "logits": 204
+  },
+  "maximum_absolute_error_by_stage": {
+    "kv_k": 4.0589501892895896e-07,
+    "kv_v": 2.5491846011860275e-07,
+    "embedding": 5.960464477539063e-08,
+    "norm1": 2.6149760712357306e-07,
+    "q": 3.5793285890761695e-07,
+    "k": 4.0589501892895896e-07,
+    "v": 2.5491846011860275e-07,
+    "attention": 2.710035813535683e-07,
+    "attention_output": 4.878596471247221e-07,
+    "residual": 4.953102277216459e-07,
+    "norm2": 4.263624076017436e-07,
+    "ff": 4.570297549300051e-07,
+    "hidden": 6.476731932991697e-07,
+    "norm_final": 2.0675541538839326e-06,
+    "logits": 5.5016220859016585e-06
+  },
+  "numeric_tolerance": {
+    "absolute": 2e-05,
+    "relative": 2e-05
+  },
+  "scope": "Actual GPU output and online memory; independent full-prefix FP64 reference"
+}

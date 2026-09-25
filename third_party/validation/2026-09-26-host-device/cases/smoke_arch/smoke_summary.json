@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "input": 41,
+  "output": 42,
+  "expected_output": 42,
+  "workers": 8
+}

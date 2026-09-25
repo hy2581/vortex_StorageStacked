@@ -39,7 +39,7 @@ def resolve(output):
     elf = output / 'build/program.elf'
     if not elf.is_file():
         raise ValueError('Makefile did not produce build/program.elf')
-    for name in ('program.vxbin','host.elf','readback.json'):
+    for name in ('program.vxbin','host.elf','readback.json','programs.json'):
         if not (output/'build'/name).is_file():raise ValueError('Makefile did not produce '+name)
     resolved={'device':'vortex','time_unit':'1 fs','architecture':architecture,
               'benchmark':benchmark,'address_map':address_map(architecture),

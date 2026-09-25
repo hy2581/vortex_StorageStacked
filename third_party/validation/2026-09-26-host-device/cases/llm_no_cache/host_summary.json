@@ -1,0 +1,115 @@
+{
+  "programs": {
+    "host": {
+      "sources": [
+        "host.cpp"
+      ],
+      "binary": "host.elf",
+      "isa": "x86-64",
+      "runs_on": "gem5 TimingSimpleCPU"
+    },
+    "device": {
+      "sources": [
+        "kernel.cpp"
+      ],
+      "binary": "program.elf",
+      "image": "program.vxbin",
+      "isa": "RV32",
+      "runs_on": "Vortex SimX"
+    },
+    "source_snapshot": "sources/"
+  },
+  "configured_cpus": 4,
+  "active_cpus": 4,
+  "cores": [
+    {
+      "cpu": 0,
+      "instructions": 2870970,
+      "cycles": 9533396,
+      "l1i_accesses": 3840379,
+      "l1d_accesses": 1119882,
+      "translation_samples": 64
+    },
+    {
+      "cpu": 1,
+      "instructions": 852691,
+      "cycles": 9465841,
+      "l1i_accesses": 1091382,
+      "l1d_accesses": 362341,
+      "translation_samples": 64
+    },
+    {
+      "cpu": 2,
+      "instructions": 17463,
+      "cycles": 9465565,
+      "l1i_accesses": 21950,
+      "l1d_accesses": 6794,
+      "translation_samples": 64
+    },
+    {
+      "cpu": 3,
+      "instructions": 15430,
+      "cycles": 9465494,
+      "l1i_accesses": 19256,
+      "l1d_accesses": 5731,
+      "translation_samples": 64
+    }
+  ],
+  "phases": {
+    "prepare": [
+      {
+        "worker": 0,
+        "tid": 100,
+        "begin": 0,
+        "end": 251
+      },
+      {
+        "worker": 1,
+        "tid": 101,
+        "begin": 251,
+        "end": 502
+      },
+      {
+        "worker": 2,
+        "tid": 102,
+        "begin": 502,
+        "end": 753
+      },
+      {
+        "worker": 3,
+        "tid": 103,
+        "begin": 753,
+        "end": 1004
+      }
+    ],
+    "check": [
+      {
+        "worker": 0,
+        "tid": 100,
+        "begin": 0,
+        "end": 251
+      },
+      {
+        "worker": 1,
+        "tid": 105,
+        "begin": 251,
+        "end": 502
+      },
+      {
+        "worker": 2,
+        "tid": 106,
+        "begin": 502,
+        "end": 753
+      },
+      {
+        "worker": 3,
+        "tid": 107,
+        "begin": 753,
+        "end": 1004
+      }
+    ]
+  },
+  "host_check_errors": 0,
+  "scope": "Per-core gem5 counters plus barrier-synchronized application thread partitions; counts are not a speedup measurement",
+  "passed": true
+}

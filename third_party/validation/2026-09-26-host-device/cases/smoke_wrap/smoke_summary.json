@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "input": 4294967295,
+  "output": 0,
+  "expected_output": 0,
+  "workers": 4
+}
