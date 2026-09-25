@@ -1,0 +1,40 @@
+{
+  "sources": {
+    "project": {
+      "path": "StorageStacked",
+      "commit": "3be39b697bdc315ae0be08ed2162c322bcf59462"
+    },
+    "gem5": {
+      "url": "https://github.com/gem5/gem5.git",
+      "commit": "c8222cc67a399bfc01e8658dd14b30d5bfd634f9"
+    },
+    "vortex": {
+      "url": "https://github.com/vortexgpgpu/vortex.git",
+      "commit": "d76b7f24e658867ab57e3942d7c648c3e6af072d"
+    }
+  },
+  "files": [
+    {
+      "name": "third_party/gem5/build/AXI/gem5.opt",
+      "bytes": 867005576
+    },
+    {
+      "name": "mem_sim/build-unified/libstoragestacked_memsim.so",
+      "bytes": 1501848
+    },
+    {
+      "name": "build/vortex/sim/simx/libvortex-gem5.so",
+      "bytes": 1414104
+    },
+    {
+      "name": "build/vortex/tests/regression/sgemm/kernel.vxbin",
+      "bytes": 4592
+    },
+    {
+      "name": "build/vortex/tests/regression/sgemm/sgemm",
+      "bytes": 33720
+    }
+  ],
+  "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:50:00) [GCC 14.3.0]",
+  "compiler": "x86_64-conda-linux-gnu-g++ (conda-forge gcc 13.4.0-20) 13.4.0"
+}

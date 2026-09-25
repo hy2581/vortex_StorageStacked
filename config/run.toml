@@ -1,0 +1,38 @@
+# 日常只改这个文件。查看生效值：./run.sh config；运行：./run.sh run。
+# 修改 GPU 核数/warp/线程数后，run 会自动重建 SimX 和全部已接入的算例。
+
+[benchmark]
+name = "vecadd"         # vecadd / sgemm / sgemv / softmax / relu
+elements = 4            # vecadd、relu：向量长度；其他：方阵边长；sgemv 须为 4 的倍数
+
+[gpu]
+clock_mhz = 1000        # SimX 设备时钟；gem5 每周期推进一次 SimX
+cores = 1              # 单簇核数
+warps = 4              # 每核 warp 数
+threads = 4            # 每个 warp 的线程数；以上三项必须是 2 的幂
+
+[memory]
+standard = "hbm4"       # 在线 mem_sim 行为模型；本项目验收覆盖 HBM4
+channels = 8
+scale = 1              # 内存时钟周期倍率；4 表示内存时钟变慢 4 倍
+queue = 4              # 每个内存入口/控制器/响应队列的深度
+slots = 8              # 内存桥最多同时接纳的 AXI burst 数
+response_hold = 0      # 额外延迟响应的内存 tick 数；通常保持 0
+
+# 以下为链路与主机的高级参数，普通计算实验可保持默认。
+[axi]
+period_ns = 2          # AXI 时钟周期；数据宽度固定 256 bit
+outstanding = 16       # TLM→AXI 桥最多同时处理的请求数，不是 GPU 发射宽度
+planes = 2             # AXI-over-UCIe 资源平面数（1～4）
+stalls = true          # 开启确定性反压，验收检查 VALID/READY 握手
+replay = false         # 注入 Flit CRC 错误并重放，用于链路测试
+
+[host]
+clock_mhz = 2000        # gem5 x86 主机；只运行官方运行库、加载和结果验算
+num_cpus = 4            # 官方运行库有后台线程，至少需要 2 个 CPU 上下文
+l1i = "32KiB"
+l1d = "32KiB"
+l2 = "1MiB"
+
+[simulation]
+max_ticks = 20000000000000  # watchdog；统一 1 tick = 1 fs，到限即失败

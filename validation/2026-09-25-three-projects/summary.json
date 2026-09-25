@@ -1,0 +1,260 @@
+{
+  "passed": true,
+  "device": "vortex",
+  "native_tests_passed": 19,
+  "api_check": {
+    "passed": true,
+    "masked_read": [
+      1,
+      0,
+      3,
+      0,
+      5,
+      0,
+      7,
+      0
+    ],
+    "queue_retry": true,
+    "large_window_bytes": 8589934592,
+    "high_address_no_alias": true,
+    "sparse_zero_initialized": true
+  },
+  "cases": {
+    "default": {
+      "passed": true,
+      "sources": {
+        "vortex": {
+          "transactions": 257,
+          "bytes": 14136,
+          "roundtrip_mean_ns": 124.00194552529183
+        },
+        "host": {
+          "transactions": 9202,
+          "bytes": 73616,
+          "roundtrip_mean_ns": 62.86263855683547
+        }
+      },
+      "devices": {
+        "core_read": 6,
+        "core_write": 1,
+        "cp_read": 44,
+        "cp_write": 44,
+        "completed": 95,
+        "cp_cycles": 802,
+        "cycles": 626
+      }
+    },
+    "slow": {
+      "passed": true,
+      "sources": {
+        "vortex": {
+          "transactions": 257,
+          "bytes": 14136,
+          "roundtrip_mean_ns": 397.77626459143966
+        },
+        "host": {
+          "transactions": 9202,
+          "bytes": 73616,
+          "roundtrip_mean_ns": 73.27983047163659
+        }
+      },
+      "devices": {
+        "core_read": 6,
+        "core_write": 1,
+        "cp_read": 44,
+        "cp_write": 44,
+        "completed": 95,
+        "cp_cycles": 1208,
+        "cycles": 1032
+      }
+    },
+    "replay": {
+      "passed": true,
+      "sources": {
+        "vortex": {
+          "transactions": 257,
+          "bytes": 14136,
+          "roundtrip_mean_ns": 134.7412451361868
+        },
+        "host": {
+          "transactions": 9202,
+          "bytes": 73616,
+          "roundtrip_mean_ns": 64.37720060856336
+        }
+      },
+      "devices": {
+        "core_read": 6,
+        "core_write": 1,
+        "cp_read": 44,
+        "cp_write": 44,
+        "completed": 95,
+        "cp_cycles": 790,
+        "cycles": 614
+      }
+    },
+    "alternate": {
+      "passed": true,
+      "sources": {
+        "host": {
+          "transactions": 9288,
+          "bytes": 74304,
+          "roundtrip_mean_ns": 62.99407838070629
+        },
+        "vortex": {
+          "transactions": 287,
+          "bytes": 16344,
+          "roundtrip_mean_ns": 125.15679442508711
+        }
+      },
+      "devices": {
+        "core_read": 15,
+        "core_write": 4,
+        "cp_read": 44,
+        "cp_write": 44,
+        "completed": 107,
+        "cp_cycles": 1792,
+        "cycles": 1615
+      }
+    },
+    "sgemm": {
+      "passed": true,
+      "sources": {
+        "vortex": {
+          "transactions": 270,
+          "bytes": 15256,
+          "roundtrip_mean_ns": 148.3314814814815
+        },
+        "host": {
+          "transactions": 9256,
+          "bytes": 74048,
+          "roundtrip_mean_ns": 62.929073033707866
+        }
+      },
+      "devices": {
+        "core_read": 9,
+        "core_write": 1,
+        "cp_read": 44,
+        "cp_write": 44,
+        "completed": 98,
+        "cp_cycles": 1626,
+        "cycles": 1450
+      }
+    },
+    "sgemv": {
+      "passed": true,
+      "sources": {
+        "vortex": {
+          "transactions": 304,
+          "bytes": 17304,
+          "roundtrip_mean_ns": 131.10361842105263
+        },
+        "host": {
+          "transactions": 9248,
+          "bytes": 73984,
+          "roundtrip_mean_ns": 62.97285899653979
+        }
+      },
+      "devices": {
+        "core_read": 27,
+        "core_write": 17,
+        "cp_read": 44,
+        "cp_write": 44,
+        "completed": 132,
+        "cp_cycles": 1892,
+        "cycles": 1716
+      }
+    },
+    "softmax": {
+      "passed": true,
+      "sources": {
+        "vortex": {
+          "transactions": 298,
+          "bytes": 16960,
+          "roundtrip_mean_ns": 128.33053691275168
+        },
+        "host": {
+          "transactions": 9296,
+          "bytes": 74368,
+          "roundtrip_mean_ns": 62.90565834767642
+        }
+      },
+      "devices": {
+        "core_read": 18,
+        "core_write": 8,
+        "cp_read": 42,
+        "cp_write": 42,
+        "completed": 110,
+        "cp_cycles": 7589,
+        "cycles": 7418
+      }
+    },
+    "relu": {
+      "passed": true,
+      "sources": {
+        "host": {
+          "transactions": 9204,
+          "bytes": 73632,
+          "roundtrip_mean_ns": 62.94589308996089
+        },
+        "vortex": {
+          "transactions": 257,
+          "bytes": 14336,
+          "roundtrip_mean_ns": 135.94163424124514
+        }
+      },
+      "devices": {
+        "core_read": 6,
+        "core_write": 1,
+        "cp_read": 42,
+        "cp_write": 42,
+        "completed": 91,
+        "cp_cycles": 1057,
+        "cycles": 885
+      }
+    }
+  },
+  "reused_verified_cases": [],
+  "memory_feedback": {
+    "passed": true,
+    "scale": 4,
+    "cycles": [
+      626,
+      1032
+    ]
+  },
+  "llm_operators": {
+    "sgemv": {
+      "operator": "sgemv",
+      "elements": 8,
+      "rows": 8,
+      "columns": 8,
+      "checked_outputs": 8,
+      "max_abs_error": 5.96046448e-08,
+      "passed": true
+    },
+    "softmax": {
+      "operator": "softmax",
+      "elements": 8,
+      "checked_outputs": 64,
+      "max_abs_error": 1.78178876e-08,
+      "row_sum_max_error": 3.44589353e-08,
+      "passed": true
+    },
+    "relu": {
+      "operator": "relu",
+      "elements": 16,
+      "checked_outputs": 16,
+      "negative_inputs": 6,
+      "zero_inputs": 2,
+      "positive_inputs": 8,
+      "passed": true
+    }
+  },
+  "softmax_exp_check": {
+    "samples": 1000001,
+    "max_abs_error": 5.68824881642e-08,
+    "max_relative_error_above_cutoff": 9.83601222398e-08,
+    "errors": 0,
+    "passed": true
+  }
+}

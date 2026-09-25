@@ -1,0 +1,47 @@
+{
+  "result_directory": "results/acceptance-llm-20260925",
+  "overall": {
+    "passed": false,
+    "error": "Command '['/home/hy258/hy/zhongxing/vortex_StorageStacked/.deps/toolchain/bin/python', '/home/hy258/hy/zhongxing/vortex_StorageStacked/scripts/run.py', '--config', 'config/run.toml', '--output', '/home/hy258/hy/zhongxing/vortex_StorageStacked/results/acceptance-llm-20260925/softmax', '--benchmark', 'config/benchmarks/softmax.json']' returned non-zero exit status 1."
+  },
+  "softmax_operator_check": {
+    "operator": "softmax",
+    "elements": 8,
+    "checked_outputs": 64,
+    "max_abs_error": 0.52894457,
+    "row_sum_max_error": 3.44589353e-08,
+    "passed": false
+  },
+  "relu_split_packets": [
+    {
+      "id": "882",
+      "command": "R",
+      "address": "8522891392",
+      "bytes": "24",
+      "begin_tick": "3074052000000",
+      "accepted_tick": "3074054000000",
+      "axi_done_tick": "3074146000000",
+      "end_resp_tick": "3074146000000",
+      "segments": "2",
+      "requestor": "19",
+      "stream": "0",
+      "substream": "0",
+      "status": "1"
+    },
+    {
+      "id": "883",
+      "command": "W",
+      "address": "4295036928",
+      "bytes": "24",
+      "begin_tick": "3074152000000",
+      "accepted_tick": "3074154000000",
+      "axi_done_tick": "3074264000000",
+      "end_resp_tick": "3074264000000",
+      "segments": "2",
+      "requestor": "19",
+      "stream": "0",
+      "substream": "0",
+      "status": "1"
+    }
+  ]
+}

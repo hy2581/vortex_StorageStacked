@@ -1,0 +1,155 @@
+{
+  "passed": true,
+  "device": "vortex",
+  "benchmark": {
+    "name": "vecadd",
+    "elements": 4
+  },
+  "axi_data_bits": 256,
+  "completion": {
+    "cause": "exiting with last active thread context",
+    "code": 0,
+    "tick_fs": 3273473000000,
+    "passed": true
+  },
+  "sources": {
+    "host": {
+      "transactions": 9202,
+      "bytes": 73616,
+      "roundtrip_mean_ns": 73.27983047163659
+    },
+    "vortex": {
+      "transactions": 257,
+      "bytes": 14136,
+      "roundtrip_mean_ns": 397.77626459143966
+    }
+  },
+  "devices": {
+    "core_read": 6,
+    "core_write": 1,
+    "cp_read": 44,
+    "cp_write": 44,
+    "completed": 95,
+    "cp_cycles": 1208,
+    "cycles": 1032
+  },
+  "checks": {
+    "check_summary": {
+      "passed": true,
+      "axi_data_bits": 256,
+      "transactions": 9459,
+      "axi_handshakes": 28388,
+      "max_tlm_latency_ns": 1700.0,
+      "coverage": {
+        "narrow_bursts": 9243,
+        "full_width_bursts": 216,
+        "bursts_256_beats": 0,
+        "masked_write_beats": 0,
+        "aw_before_w": 9256,
+        "w_before_aw": 0,
+        "error_responses": 0,
+        "checked_read_bytes": 8784
+      }
+    },
+    "aou_check_summary": {
+      "passed": true,
+      "master_data_bits": 256,
+      "wide_handshakes": 28388,
+      "wide_vcd_data_beats": 9673,
+      "width": 256,
+      "planes": 2,
+      "memory_completed": 9459,
+      "memory_errors": 0,
+      "target_reads": 203,
+      "target_writes": 9256,
+      "target_read_beats": 330,
+      "target_write_beats": 9343,
+      "tx_flits": 28247,
+      "rx_flits": 37962,
+      "forward_replays": 0,
+      "reverse_replays": 0,
+      "crc_errors": 0,
+      "order_violations": 0
+    },
+    "memsim_check": {
+      "passed": true,
+      "bursts": 9459,
+      "children": 9673,
+      "errors": 0,
+      "image_bytes": 75648,
+      "window_bytes": 4294967296,
+      "period_fs": 1000000,
+      "commands": {
+        "REFpb": 107312,
+        "ACT": 160,
+        "WR": 9343,
+        "PREpb": 160,
+        "RD": 330
+      },
+      "dfi_data_events": 10103,
+      "submit_stalls": 4893,
+      "response_stalls": 0
+    },
+    "memsim_core": {
+      "passed": true,
+      "submitted": 9673,
+      "returned": 9673,
+      "submit_stalls": 4893,
+      "cycles": 3273473,
+      "commands": 117305,
+      "dfi_events": 127408,
+      "command_errors": 0,
+      "dfi_errors": 0
+    }
+  },
+  "wave": {
+    "slow": {
+      "passed": true,
+      "source": "/home/hy258/hy/zhongxing/vortex_StorageStacked/results/acceptance-config-20260924/slow",
+      "sampled_rising_edges": 1636737,
+      "handshakes": {
+        "AW": 9256,
+        "W": 9343,
+        "B": 9256,
+        "AR": 203,
+        "R": 330
+      },
+      "stalled_edges": {
+        "W": 23112,
+        "B": 3809,
+        "R": 242
+      },
+      "first_valid_ns": {
+        "wvalid": 2300822.0,
+        "awvalid": 2300828.0,
+        "bvalid": 2300914.0,
+        "arvalid": 3018752.0,
+        "rvalid": 3018856.0
+      },
+      "ready_transitions": {
+        "arready": 2,
+        "awready": 2,
+        "bready": 654692,
+        "rready": 467638,
+        "wready": 18485
+      },
+      "first_handshake_ns": {
+        "AW": 2300830.0,
+        "W": 2300834.0,
+        "B": 2300916.0,
+        "AR": 3018754.0,
+        "R": 3018858.0
+      },
+      "checked": [
+        "VCD/CSV equality",
+        "VALID/payload hold",
+        "clocked output transitions",
+        "BVALID after AW/all W",
+        "RVALID after AR",
+        "WLAST/RLAST",
+        "drained"
+      ]
+    }
+  },
+  "scope": "accelerator -> native AXI256 -> AXI2Flit -> UCIe -> online mem_sim -> returned data"
+}

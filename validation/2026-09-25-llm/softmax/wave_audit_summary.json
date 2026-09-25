@@ -1,0 +1,49 @@
+{
+  "softmax": {
+    "passed": true,
+    "source": "/home/hy258/hy/zhongxing/vortex_StorageStacked/results/acceptance-llm-fp32-20260925/softmax",
+    "sampled_rising_edges": 1593493,
+    "handshakes": {
+      "AW": 9338,
+      "W": 9446,
+      "B": 9338,
+      "AR": 256,
+      "R": 408
+    },
+    "stalled_edges": {
+      "W": 23367,
+      "B": 5073,
+      "R": 341
+    },
+    "first_valid_ns": {
+      "wvalid": 2282178.0,
+      "awvalid": 2282184.0,
+      "bvalid": 2282230.0,
+      "arvalid": 2919124.0,
+      "rvalid": 2919170.0
+    },
+    "ready_transitions": {
+      "arready": 2,
+      "awready": 2,
+      "bready": 637394,
+      "rready": 455282,
+      "wready": 18595
+    },
+    "first_handshake_ns": {
+      "AW": 2282186.0,
+      "W": 2282190.0,
+      "B": 2282234.0,
+      "AR": 2919126.0,
+      "R": 2919174.0
+    },
+    "checked": [
+      "VCD/CSV equality",
+      "VALID/payload hold",
+      "clocked output transitions",
+      "BVALID after AW/all W",
+      "RVALID after AR",
+      "WLAST/RLAST",
+      "drained"
+    ]
+  }
+}

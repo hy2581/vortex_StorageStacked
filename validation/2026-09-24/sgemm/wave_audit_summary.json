@@ -1,0 +1,49 @@
+{
+  "sgemm": {
+    "passed": true,
+    "source": "/home/hy258/hy/zhongxing/vortex_StorageStacked/results/acceptance-20260924/sgemm",
+    "sampled_rising_edges": 1591719,
+    "handshakes": {
+      "AW": 9311,
+      "W": 9406,
+      "B": 9311,
+      "AR": 215,
+      "R": 353
+    },
+    "stalled_edges": {
+      "W": 23292,
+      "B": 5096,
+      "R": 297
+    },
+    "first_valid_ns": {
+      "wvalid": 2302586.0,
+      "awvalid": 2302592.0,
+      "bvalid": 2302638.0,
+      "arvalid": 2939814.0,
+      "rvalid": 2939860.0
+    },
+    "ready_transitions": {
+      "arready": 2,
+      "awready": 2,
+      "bready": 636684,
+      "rready": 454776,
+      "wready": 18545
+    },
+    "first_handshake_ns": {
+      "AW": 2302594.0,
+      "W": 2302598.0,
+      "B": 2302644.0,
+      "AR": 2939816.0,
+      "R": 2939866.0
+    },
+    "checked": [
+      "VCD/CSV equality",
+      "VALID/payload hold",
+      "clocked output transitions",
+      "BVALID after AW/all W",
+      "RVALID after AR",
+      "WLAST/RLAST",
+      "drained"
+    ]
+  }
+}

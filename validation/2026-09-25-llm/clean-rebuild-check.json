@@ -1,0 +1,56 @@
+{
+  "passed": true,
+  "check": "Clean rebuild of all benchmark hosts and kernels; direct byte comparison with binaries used by the completed acceptance",
+  "files": [
+    {
+      "file": "build/vortex/tests/regression/vecadd/vecadd",
+      "bytes": 29496,
+      "identical_to_accepted_binary": true
+    },
+    {
+      "file": "build/vortex/tests/regression/vecadd/kernel.vxbin",
+      "bytes": 4272,
+      "identical_to_accepted_binary": true
+    },
+    {
+      "file": "build/vortex/tests/regression/sgemm/sgemm",
+      "bytes": 33720,
+      "identical_to_accepted_binary": true
+    },
+    {
+      "file": "build/vortex/tests/regression/sgemm/kernel.vxbin",
+      "bytes": 4592,
+      "identical_to_accepted_binary": true
+    },
+    {
+      "file": "build/vortex/tests/regression/sgemv/sgemv",
+      "bytes": 34024,
+      "identical_to_accepted_binary": true
+    },
+    {
+      "file": "build/vortex/tests/regression/sgemv/kernel.vxbin",
+      "bytes": 4400,
+      "identical_to_accepted_binary": true
+    },
+    {
+      "file": "build/vortex/tests/regression/softmax/softmax",
+      "bytes": 32984,
+      "identical_to_accepted_binary": true
+    },
+    {
+      "file": "build/vortex/tests/regression/softmax/kernel.vxbin",
+      "bytes": 4656,
+      "identical_to_accepted_binary": true
+    },
+    {
+      "file": "build/vortex/tests/regression/relu/relu",
+      "bytes": 29600,
+      "identical_to_accepted_binary": true
+    },
+    {
+      "file": "build/vortex/tests/regression/relu/kernel.vxbin",
+      "bytes": 4336,
+      "identical_to_accepted_binary": true
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Import('*')
+import os
+env.Append(CPPPATH=[Dir('#/src/systemc/ext'),
+    os.path.join(os.environ['STORAGE_STACK_ROOT'], 'storage_axi')])
+SimObject('Gem5Axi.py', sim_objects=['AxiDemo'])
+Source('axi_master.cc')
+Source('axi_demo.cc')

@@ -1,0 +1,9 @@
+Running vortex default
+Running vortex slow
+Running vortex replay
+Running vortex alternate
+Running vortex sgemm
+Running vortex sgemv
+Running vortex softmax
+Running vortex relu
+PASS: /home/hy258/hy/zhongxing/vortex_StorageStacked/results/acceptance-llm-fp32-20260925/summary.json
