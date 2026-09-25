@@ -45,7 +45,15 @@ cd user
 
 每个项目只有一个 `config.json`。其中配置程序输入、GPU 核/warp/线程、CPU 核数、MMU/TLB、缓存、AXI、UCIe、MEMSIM 和仿真上限。修改后直接运行；需要更新的平台编译由入口处理。
 
-每个项目都包含明确的两类程序：`host.cpp → host.elf` 由 gem5 的 x86 CPU 执行，`kernel.cpp → program.elf / program.vxbin` 由 Vortex GPU 执行。CPU 核数控制示例的工作线程数；报告列出每核实际指令、缓存和 MMU 活动。CPU 核数、GPU 核数和 GPU 工作组数分别配置。
+打开用户源码即可看到两类程序的分工：
+
+| 程序 | 编译成果与执行位置 | 负责的工作 |
+|---|---|---|
+| [SMOKE host.cpp](user/smoke/src/host.cpp) / [LLM host.cpp](user/llm/src/host.cpp) | `host.elf`，gem5 的 x86 CPU | 多线程准备输入、上传、发射 GPU、回读和分片检查 |
+| [SMOKE kernel.cpp](user/smoke/src/kernel.cpp) | `program.elf / program.vxbin`，Vortex GPU | 读取输入、加一、写回 |
+| [LLM kernel.cpp](user/llm/src/kernel.cpp) | `program.elf / program.vxbin`，Vortex GPU | 使用 `tinyllm.h` 中的模型执行 prefill 和逐 token 推理 |
+
+**gem5 多核**由 `host.num_cpus` 配置，示例的 `host.cpp` 按核数创建工作线程。默认四核 SMOKE 每线程处理一份输入，两核时每线程处理两份，输出均为 `42`。`gpu.cores` 配置 GPU 核数，SMOKE 的 `program.workers` 配置 GPU 工作组数。修改方法和报告字段见[环境配置说明第 6 节](docs/01-用户环境配置说明.md#6-cpugpu-分别跑什么cpu-多核怎么看)，两核/四核操作见[SMOKE 指南第 7 节](docs/02-用户从0开始添加SMOKE简要指南.md#7-比较四核和两核)。
 
 新增项目遵循同样结构：`user/<项目>/config.json` 和 `src/Makefile`、源文件。`./run.sh <项目>` 不需要注册项目名，Makefile 通过 SDK 生成主机及设备程序。
 
@@ -53,7 +61,7 @@ cd user
 
 结果保存到 `user/<项目>/result/<运行目录>/`。入口打印 `report.md` 位置；成功要求 `summary.json` 的 `passed: true`。
 
-报告给出输入输出、GPU 周期、事务和独立校验结果。目录还保存配置、编译成果、实际回读字节、地址转换、缓存统计、AXI VCD、Flit、内存记录和链路视图。TinyLLM 会逐项核对权重、KV、中间结果与 token。
+先看 `report.md`；`host_summary.json` 给出线程分片和每核实际指令、缓存及 MMU 活动，`build/programs.json` 对应 CPU/GPU 程序，`build/sources/` 保存本次源码。目录还保存配置、实际回读字节、AXI VCD、Flit、内存记录和链路视图。TinyLLM 会逐项核对权重、KV、中间结果与 token。
 
 ```bash
 # 在 user/ 中执行单类回归
@@ -69,12 +77,15 @@ CPU/GPU 程序拆分后已完成 9 组平台场景、2 次新建项目运行、1
 
 ```mermaid
 flowchart LR
-    A[user JSON + Makefile] --> B[gem5 CPU / MMU / 多级缓存]
-    B --> C[Vortex 多核 GPU]
-    B --> D[integration: timing / TLM / AXI256]
-    C --> D
+    A[config.json + Makefile] --> H[host.cpp → host.elf]
+    A --> K[kernel.cpp → program.vxbin]
+    H --> B[gem5 CPU 多线程准备 / 上传 / 发射]
+    K --> C[Vortex GPU 执行 kernel]
+    B --> C
+    B <--> D[integration: timing / TLM / AXI256]
+    C <--> D
     D <--> E[axi_StorageStacked: AXI2Flit / UCIe / MEMSIM]
-    D --> F[实际数据和链路校验]
+    B --> F[CPU 回读检查 + 独立验收]
     E --> F
     F --> G[user 项目 result]
 ```

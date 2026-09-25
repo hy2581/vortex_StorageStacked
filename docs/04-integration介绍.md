@@ -15,10 +15,12 @@ integration/
 
 ```mermaid
 flowchart LR
-    H[gem5 多核 CPU / MMU / L1 / L2] --> V[Vortex 运行库和 GPU]
-    H --> M[GPU BAR 访问]
-    V --> M
+    H[gem5 多核 CPU 执行 host.elf] --> R[Vortex 运行库上传 / 发射 / 回读]
+    R --> V[Vortex SimX 执行 program.vxbin]
+    R --> M[CPU 对 GPU BAR 的访问]
+    V --> D[GPU 外部访存 / timing DMA]
     M --> P[来源监测 / gem5 timing packet]
+    D --> P
     P --> T[Gem5ToTlmBridge64]
     T --> A[Master: TLM→AXI256]
     A <--> S[公共 AouBackend]
@@ -56,23 +58,26 @@ flowchart LR
 
 ## 3. system.py
 
-读取本次 `resolved.json`，调用平台创建 CPU、MMU、缓存、GPU，再连接公共存储桥。`host_binary` 指向 CPU 执行的 `host.elf`，`kernel` 指向主机要加载的 `program.vxbin`；CPU/GPU 两份用户源码分别在项目的 `src/host.cpp`、`src/kernel.cpp`。流程为：
+读取本次 `resolved.json`，调用平台创建 CPU、MMU、缓存、GPU，再连接公共存储桥。`host_binary` 指向 CPU 执行的 `host.elf`，`kernel` 指向主机要加载的 `program.vxbin`；CPU/GPU 两份用户源码分别在项目的 `src/host.cpp`、`src/kernel.cpp`。
+
+平台 `third_party/runtime/soc.py` 按 `host.num_cpus` 创建多个 `TimingSimpleCPU`，在 SE 模式下共同执行一个主机进程；工作线程由用户的 `host.cpp` 创建。各核使用私有 MMU/L1、共享 L2，主机代码、栈和堆访问主机内存；GPU BAR 和 GPU 外部访存连接本目录的存储桥。流程为：
 
 1. 创建 gem5/Vortex 平台，统一时间单位为 1 fs。
 2. 配置存储窗口、AXI 时钟和 MEMSIM 参数。
 3. 连接来源监测器、gem5/TLM 转换器与 `StorageBridge`。
 4. 为主机运行库映射 CP 寄存器和 GPU BAR。
-5. 运行设备程序，检查退出原因，结束后导出 `completion.json`。
+5. gem5 执行 `host.elf`，主机调用 Vortex 运行库加载和发射 `program.vxbin`；检查退出原因，结束后导出 `completion.json`。
 
-数值、协议、Flit、内存和波形验收由运行入口继续执行。
+运行入口随后执行每核活动与线程分片检查，生成 `host_summary.json`，并继续数值、协议、Flit、内存和波形验收。`completion.json` 记录仿真结束，整体通过状态看 `summary.json`。
 
 ```mermaid
 flowchart TD
-    A[读取 resolved.json] --> B[创建平台]
+    A[读取 resolved.json] --> B[按 host.num_cpus 创建 CPU / MMU / 缓存 / GPU]
     B --> C[连接 TLM 与 AXI 存储]
     C --> D[实例化和映射地址]
-    D --> E[m5.simulate]
-    E --> F[finish 与完成记录]
+    D --> E[m5.simulate / host.elf 分片准备并发射]
+    E --> K[Vortex 执行 program.vxbin / CPU 回读检查]
+    K --> F[finish 与完成记录]
     F --> G[运行入口执行独立验收]
 ```
 

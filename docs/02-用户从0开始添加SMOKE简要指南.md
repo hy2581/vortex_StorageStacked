@@ -10,7 +10,7 @@ mkdir -p my_smoke/src
 
 ## 2. 保存项目配置
 
-复制完整平台配置，然后修改输入值和工作组数：
+复制完整平台配置，选择 4 个 CPU 核、2 个 GPU 核、4 个 GPU 工作组，输入为 41：
 
 ```bash
 cp smoke/config.json my_smoke/config.json
@@ -20,11 +20,13 @@ from pathlib import Path
 p=Path('my_smoke/config.json')
 c=json.loads(p.read_text())
 c['program']={'type':'smoke','input':41,'workers':4}
+c['host']['num_cpus']=4
+c['gpu']['cores']=2
 p.write_text(json.dumps(c,indent=2)+'\n')
 PY
 ```
 
-需要修改 GPU、CPU/MMU/缓存、AXI、UCIe 或 MEMSIM 时，直接改这一个 JSON。完整字段见[环境配置说明](01-用户环境配置说明.md)。写 JSON 是在磁盘上保存配置文件；设备程序运行后才会向模拟内存写数据。
+需要修改 GPU、CPU/MMU/缓存、AXI、UCIe 或 MEMSIM 时，直接改这一个 JSON。完整字段见[环境配置说明](01-用户环境配置说明.md)。写 JSON 是在磁盘上保存配置文件；运行 `host.elf` 后，CPU 才会准备输入并通过运行库上传到模拟存储。
 
 ## 3. 准备 CPU 和 GPU 两份源码
 
@@ -93,14 +95,45 @@ cat my_smoke/result/first/host_summary.json
 flowchart LR
     A[config.json] --> B[Makefile 编译]
     C[host.cpp + kernel.cpp] --> B
-    B --> D[gem5 CPU 准备和发射 / Vortex GPU 计算]
+    B --> H[host.elf / gem5 CPU 多线程准备输入]
+    B --> K[program.vxbin / GPU 加载镜像]
+    H --> D[上传 / Vortex GPU 执行加一]
+    K --> D
     D <--> E[AXI / UCIe / MEMSIM]
-    D --> F[回读输出并独立校验]
+    D --> F[CPU 分片检查回读 / 独立验收]
     E --> F
     F --> G[result/first/report.md]
 ```
 
-## 7. 添加自己的计算
+## 7. 比较四核和两核
+
+只把 CPU 核数改为 2，GPU 核数和 4 个工作组保持上面的配置：
+
+```bash
+python3 - <<'PY'
+import json
+from pathlib import Path
+p=Path('my_smoke/config.json')
+c=json.loads(p.read_text())
+c['host']['num_cpus']=2
+p.write_text(json.dumps(c,indent=2)+'\n')
+PY
+./run.sh my_smoke --output result/cpu2
+python3 - <<'PY'
+import json
+from pathlib import Path
+for name in ('first', 'cpu2'):
+    h=json.loads((Path('my_smoke/result')/name/'host_summary.json').read_text())
+    print(name, '配置核数:', h['configured_cpus'], '活跃核数:', h['active_cpus'])
+    print('每核指令:', [c['instructions'] for c in h['cores']])
+    print('准备分片:', [(w['begin'], w['end']) for w in h['phases']['prepare']])
+    print('CPU 检查错误:', h['host_check_errors'])
+PY
+```
+
+预期：`first` 为 4 个活跃 CPU 核，分片为 `[0,1)`、`[1,2)`、`[2,3)`、`[3,4)`；`cpu2` 为 2 个活跃 CPU 核，分片为 `[0,2)`、`[2,4)`。两次输出均为 42、检查错误数均为 0。每核指令数以实际运行为准；字段说明见[环境配置说明第 6 节](01-用户环境配置说明.md#6-cpugpu-分别跑什么cpu-多核怎么看)。后续运行使用修改后的两核配置。
+
+## 8. 添加自己的计算
 
 保留同样目录结构，修改 `src/` 和 Makefile；把 `program.type` 改为 `custom`，用 `defines` 提供整数宏、`expect` 提供输出地址与期望值。例如：
 
@@ -114,13 +147,3 @@ flowchart LR
 ```
 
 自定义项目也必须提供 `host.cpp` 和 `kernel.cpp`。根据自己的输入输出修改 CPU 的准备、上传和检查代码，不能原样复用只检查 SMOKE 的主机逻辑。设备可通过 `APP_INPUT` 读取该输入，把结果写入期望地址，最后向 `0x9005000c` 写 `0x600d0000`。用户数据区为 `0x90000000`～`0x9005ffff`；输出字地址须 4 字节对齐。成功状态之后还会逐字检查真实返回数据和完整链路。
-
-## 8. 改 CPU 核数
-
-把 `my_smoke/config.json` 的 `host.num_cpus` 改为 `2`，再运行：
-
-```bash
-./run.sh my_smoke --output result/cpu2
-```
-
-与四核结果比较 `host_summary.json` 的 `active_cpus`、每核指令数和线程分片。输出仍为 42；这里观察实际任务分配，短示例不要求核数增加就加速。
