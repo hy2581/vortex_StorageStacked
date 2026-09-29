@@ -1,6 +1,6 @@
 # integration 介绍
 
-[文档目录](README.md) · 按需查参数，第一次使用先看目录中的入门或配置实验。
+[返回文档目录](README.md)。
 
 `integration/` 把 gem5/Vortex 的时序请求接入独立的 `axi_StorageStacked`。CPU、MMU、缓存、GPU 执行和工具由平台提供；本目录集中处理外部端口、请求生命周期和 AXI 信号转换。
 
@@ -68,7 +68,7 @@ flowchart LR
 2. 配置存储窗口、AXI 时钟和 MEMSIM 参数。
 3. 连接来源监测器、gem5/TLM 转换器与 `StorageBridge`。
 4. 为主机运行库映射 CP 寄存器和 GPU BAR。
-5. gem5 执行 `host.elf`，主机调用 Vortex 运行库加载和发射 `program.vxbin`；检查退出原因，结束后导出 `completion.json`。
+5. gem5 执行 `host.elf`，主机调用 Vortex 运行库加载和启动 `program.vxbin`；检查退出原因，结束后导出 `completion.json`。
 
 运行入口随后执行每核活动与线程分片检查，生成 `host_summary.json`，并继续数值、协议、Flit、内存和波形验收。`completion.json` 记录仿真结束，整体通过状态看 `summary.json`。
 

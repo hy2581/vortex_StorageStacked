@@ -1,6 +1,6 @@
 # LLM 简要说明
 
-[文档目录](README.md) · 按需查参数，第一次使用先看目录中的入门或配置实验。
+[返回文档目录](README.md)。
 
 ## 1. 文件和输入
 
@@ -17,7 +17,7 @@ user/llm/
 
 | 文件 | 执行位置与阅读顺序 |
 |---|---|
-| [host.cpp](../user/llm/src/host.cpp) | 编译为 `host.elf`，由 gem5 x86 CPU 执行：`on_cpu_cores()` 分片准备权重 → `vx_enqueue_write()` 上传权重和 prompt → `vx_enqueue_launch()` 发射 GPU → `readback_all()` 回读 → 分片检查 |
+| [host.cpp](../user/llm/src/host.cpp) | 编译为 `host.elf`，由 gem5 x86 CPU 执行：`on_cpu_cores()` 分片准备权重 → `vx_enqueue_write()` 上传权重和 prompt → `vx_enqueue_launch()` 启动 GPU 程序 → `readback_all()` 回读 → 分片检查 |
 | [kernel.cpp](../user/llm/src/kernel.cpp) | 编译为 `program.elf / program.vxbin`，由 Vortex 执行：从 `kernel_main()` 看整体流程，再看 `forward()`、`norm()`、`linear()` |
 | [tinyllm.h](../user/llm/src/tinyllm.h) | 两份程序共用的模型定义：参数、权重、词表和布局 |
 | [Makefile](../user/llm/src/Makefile) | `HOST_SOURCES` 指定 CPU 源码，`KERNEL_SOURCES` 指定 GPU 源码，`MODEL_HEADER` 指定模型头文件 |
@@ -135,7 +135,7 @@ flowchart LR
 
 上面指定的 `llm/result/first/summary.json` 记录本次完整验收状态，`host_summary.json` 记录实际 CPU 分工，`llm_summary.json` 记录模型输出与独立数值核对结果。
 
-## 用默认输入逐轮看一次生成
+## 跟着默认输入看字符怎样生成
 
 词表给每个字符分配编号：`r=13`、`e=7`、`d=6`、空格 `=1`。
 所以 `"red "` 先变成 `[13,7,6,1]`，程序计算的直接输入是这些编号。
@@ -154,9 +154,9 @@ flowchart LR
 每轮实际耗时还包括访问权重、KV 和写入观测记录。
 不能把 15÷6 直接当作实测加速比。比较性能时先保证两次结果与检查都通过。
 
-## 几个计算名词，按程序实际用途理解
+## 程序里的计算步骤
 
-| 代码中的名字 | 用普通话解释 |
+| 代码中的名字 | 在程序里是什么意思 |
 |---|---|
 | Embedding | 把字符编号查表换成 8 个数，再加上位置对应的 8 个数 |
 | LayerNorm | 计算这 8 个数的平均值和变化幅度，再调整数值尺度 |
@@ -167,12 +167,12 @@ flowchart LR
 | KV cache | 保存以前位置的 K/V，下次继续使用，减少重复计算 |
 | trace | 程序主动写出的中间计算结果，供独立参考核对 |
 
-## 改 prompt 时怎样知道改对了
+## 改了输入后怎样检查结果
 
 复制完整配置，修改 `program.prompt`，再运行 LLM。
 空格和换行都可能属于输入；先核对 `input.json` 的字符串，
 再核对 `llm_summary.json` 的输入 token 和生成 token。
 词表外字符通常在编译准备模型输入时被拒绝；JSON 语法正确并不代表词表检查已通过。
 
-切换 KV cache 的完整命令见 [配置实验与 USER 负载详解](06-配置实验与USER负载详解.md)。
+切换 KV cache 的完整命令见 [改配置、运行程序和看结果](06-配置实验与USER负载详解.md)。
 修改 prompt 后不要继续套用默认 `blu` 作为答案，校验器会根据本次输入独立计算。
