@@ -1,5 +1,7 @@
 # Vortex StorageStacked
 
+阅读入口：[文档目录](docs/README.md) · [逐文件中文讲解](https://github.com/hy2581/StorageStacked-docs)。
+
 基于 gem5 多核 CPU 与 Vortex GPU 执行用户程序，经 AXI256、UCIe 访问在线 MEMSIM。用户在 `user/` 配置、编译、运行和查看结果；`integration/` 提供与独立 AXI 存储项目的连接。
 
 ## 目录
@@ -13,7 +15,9 @@ vortex_StorageStacked/
 │   ├── smoke/               config.json + src/Makefile、host.cpp、kernel.cpp + result/
 │   └── llm/                 config.json + src/Makefile、host.cpp、kernel.cpp、tinyllm.h + result/
 ├── docs/                    用户说明和研究成果分析
-├── third_party/             gem5、Vortex、SDK、内部工具与构建缓存
+├── third_party/
+│   ├── gem5/                CPU 仿真、平台构建与运行支持
+│   └── vortex/              GPU 仿真与应用 SDK
 └── integration/             gem5/TLM 到公共 AXI 存储的桥接
 ```
 
@@ -71,7 +75,7 @@ cd user
 ./build.sh --test
 ```
 
-CPU/GPU 程序拆分后已完成 9 组平台场景、2 次新建项目运行、19 项原生测试、在线内存接口与 26 项错误拒绝检查。最新记录见 [程序拆分与多核验收](third_party/validation/2026-09-26-host-device/README.md)。默认 SMOKE 为 `41 → 42`，TinyLLM 为 `"red " → "blu"`；四核/两核实际执行、慢内存、KV cache、重放及硬件参数变更均通过独立核对。早期目录布局验收保留在 [2026-09-25 记录](third_party/validation/2026-09-25-user-layout/README.md)。
+整体回归包含 9 组平台场景、19 项原生测试、在线内存接口与 26 项错误拒绝检查。默认 SMOKE 为 `41 → 42`，TinyLLM 为 `"red " → "blu"`；检查四核/两核实际执行、慢内存、KV cache、重放和硬件参数变更。各场景结果位于 `user/<项目>/result/test-<时间>/<场景>/`，整体汇总路径由测试入口打印。新增项目的复现步骤见 [SMOKE 指南](docs/02-用户从0开始添加SMOKE简要指南.md)。
 
 ## 运行链路
 
@@ -104,4 +108,4 @@ flowchart LR
 | [integration 介绍](docs/04-integration介绍.md) | 七个文件各自职责与流程图 |
 | [研究成果一分析](docs/05-研究成果一分析.md) | 三项目如何实现 SoC 模型各项内容 |
 
-上游许可证和版本记录保留在 `third_party/`；交付源码包含本平台所需的集成扩展，来源记录见 [third_party/patches/README.md](third_party/patches/README.md)。
+源码版本、许可证与平台适配记录见 [gem5 来源说明](third_party/gem5/patches/README.md)和 [Vortex 来源说明](third_party/vortex/patches/README.md)。

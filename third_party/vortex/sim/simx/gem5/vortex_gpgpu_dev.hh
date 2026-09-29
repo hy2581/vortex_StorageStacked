@@ -11,30 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// VortexGPGPU — gem5 SimObject wrapper for libvortex-gem5.so.
-//
-// Lives at $GEM5_HOME/src/dev/vortex/vortex_gpgpu_dev.{cc,hh} after
-// sim/simx/gem5/install.sh runs. The host-side source of truth is the
-// Vortex tree (sim/simx/gem5/) so API drift between gem5 and the Vortex
-// C ABI surfaces as a build error in Vortex CI, not as a gem5
-// integration mystery.
-//
-// Design (gem5_v2_cp_migration_proposal §2.3, §2.4):
-//   - dlopen the Vortex library at construction; resolve all
-//     vortex_gem5_* symbols up-front so the hot paths (cpTick,
-//     vortexTick, PIO read/write) are direct indirect calls.
-//   - PIO range is exactly the CP regfile (PIO_BASE_ADDR + 0..+0x1FF,
-//     proposal §3); no legacy OPAE register window.
-//   - cpTickEvent_ self-schedules only while the CP has work; goes
-//     dormant otherwise (proposal §2.3). PIO writes that may have
-//     armed work re-arm the schedule.
-//   - vortexTickEvent_ self-schedules only while Vortex is running;
-//     scheduled by the CP's vortex_start hook via the registered
-//     start handler (proposal §2.4). Standalone mode skips the CP
-//     and schedules vortexTickEvent_ directly at startup.
-//   - DmaDevice base class kept for forward compatibility with the
-//     v2 DMA-port seam (proposal §2.5) and for the standalone smoke
-//     test path that still uses gem5's pio interface.
+// VortexGPGPU: gem5 SimObject wrapper for libvortex-gem5.so.
 
 #ifndef __DEV_VORTEX_VORTEX_GPGPU_DEV_HH__
 #define __DEV_VORTEX_VORTEX_GPGPU_DEV_HH__

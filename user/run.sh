@@ -41,8 +41,8 @@ case "$project" in ''|.|..|*/*) die '请指定 user/ 下的一个项目目录名
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 project_dir="user/$project"
 [[ -f "$project_dir/src/Makefile" ]] || die "找不到 $project_dir/src/Makefile"
-source third_party/runtime/environment.sh
-runtime=third_party/runtime
+source third_party/gem5/runtime/environment.sh
+runtime=third_party/gem5/runtime
 if [[ $test == 1 ]]; then
     [[ $config == config.json && -z $output ]] || die '--test 使用内置回归配置，不能同时指定配置或输出'
     exec "$AXI_PYTHON" "$runtime/test.py" --project "$project"

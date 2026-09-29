@@ -1,5 +1,7 @@
 # integration 介绍
 
+[文档目录](README.md) · 按需查参数，第一次使用先看目录中的入门或配置实验。
+
 `integration/` 把 gem5/Vortex 的时序请求接入独立的 `axi_StorageStacked`。CPU、MMU、缓存、GPU 执行和工具由平台提供；本目录集中处理外部端口、请求生命周期和 AXI 信号转换。
 
 ```text
@@ -60,7 +62,7 @@ flowchart LR
 
 读取本次 `resolved.json`，调用平台创建 CPU、MMU、缓存、GPU，再连接公共存储桥。`host_binary` 指向 CPU 执行的 `host.elf`，`kernel` 指向主机要加载的 `program.vxbin`；CPU/GPU 两份用户源码分别在项目的 `src/host.cpp`、`src/kernel.cpp`。
 
-平台 `third_party/runtime/soc.py` 按 `host.num_cpus` 创建多个 `TimingSimpleCPU`，在 SE 模式下共同执行一个主机进程；工作线程由用户的 `host.cpp` 创建。各核使用私有 MMU/L1、共享 L2，主机代码、栈和堆访问主机内存；GPU BAR 和 GPU 外部访存连接本目录的存储桥。流程为：
+平台 `third_party/gem5/runtime/soc.py` 按 `host.num_cpus` 创建多个 `TimingSimpleCPU`，在 SE 模式下共同执行一个主机进程；工作线程由用户的 `host.cpp` 创建。各核使用私有 MMU/L1、共享 L2，主机代码、栈和堆访问主机内存；GPU BAR 和 GPU 外部访存连接本目录的存储桥。流程为：
 
 1. 创建 gem5/Vortex 平台，统一时间单位为 1 fs。
 2. 配置存储窗口、AXI 时钟和 MEMSIM 参数。
@@ -147,3 +149,37 @@ stateDiagram-v2
 ```
 
 `integration` 负责产生和接收 AXI 信号；AXI2Flit、UCIe 和内存调度仍由公共项目统一提供。两个驱动以同一接口契约接入各自的公共存储实例。
+
+## 跟着一笔读请求读源码
+
+可以把“桥接”理解成翻译：上游说“读这个地址的若干字节”，桥把它转换成 AXI 信号，
+等存储返回后再把字节交回上游。一次调用发起请求，不代表数据已经返回。
+
+例如从 `0x90000000` 起读 12 字节：`Master::split` 先安排 8 字节，再安排 4 字节，
+构成两个 AXI burst。`transactions.csv` 仍是一笔 TLM 事务，但 `segments=2`；
+对照 AXI 的 AR 数时应统计分段数。`END_REQ` 表示请求已接纳，`END_RESP` 才是响应交接结束。
+
+| 到哪个阶段 | 应观察什么 |
+|---|---|
+| 上游发出请求 | 地址、读写方向、长度、来源 ID |
+| 桥正式接收 | 是否还有在途容量、分配了哪个 AXI ID |
+| 地址握手 | `ARVALID && ARREADY` 的时钟上升沿 |
+| 数据握手 | `RVALID && RREADY`；核对 ID、字节、响应码、末拍 |
+| 上游收到完成 | 返回时间与数据；此后才释放相应事务资源 |
+
+“反压”就是接收方暂时忙，要求发送方等一等。
+波形上 `VALID=1, READY=0` 表示正在等；`VALID=1, READY=1` 才传走一拍。
+AW/W 可以分别等待，写地址握手不表示写操作完成，还要等 B 响应。
+
+## 遇到问题，定位到具体文件
+
+| 问题 | 首先阅读 |
+|---|---|
+| JSON 参数看似没生效 | `resolved.json` 和本目录的参数填充代码 |
+| 请求进了桥，却没有 AXI 地址 | `axi_master.cc` 的容量判断、复位与发送队列 |
+| 返回字节位置不对 | `axi_master.cc` 的 lane 和掩码转换 |
+| 仿真末尾还有在途请求 | 完成处理、队列释放和 `finish` 的调用顺序 |
+| VCD 找不到关键信号 | `storage.cc` 的 trace 注册和波形关闭 |
+
+修改本目录后回根目录重新构建。数值结果和存储链路都应重新核对，
+不能用一次编译成功证明时序和返回数据正确。

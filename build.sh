@@ -19,7 +19,7 @@ done
 python3 - "$storage" "$jobs" <<'PY'
 import json,sys
 from pathlib import Path
-p=Path('third_party/runtime/paths.json');c=json.loads(p.read_text())
+p=Path('third_party/gem5/runtime/paths.json');c=json.loads(p.read_text())
 if sys.argv[1]:
     if Path(sys.argv[1]).is_absolute():raise SystemExit('--storage 必须是相对于仓库根目录的路径')
     if not (Path(sys.argv[1])/'storage_axi/storage_config.hh').is_file():raise SystemExit('找不到公共 AXI 存储项目')
@@ -33,12 +33,12 @@ PY
 mkdir -p third_party/.cache
 exec 9>third_party/.cache/build.lock
 flock -x 9
-bash third_party/runtime/setup.sh
-source third_party/runtime/environment.sh
-"$AXI_PYTHON" third_party/runtime/build.py --config user/smoke/config.json --force
+bash third_party/gem5/runtime/setup.sh
+source third_party/gem5/runtime/environment.sh
+"$AXI_PYTHON" third_party/gem5/runtime/build.py --config user/smoke/config.json --force
 for project in smoke llm; do
     make -C "user/$project/src" CONFIG=../config.json OUT=../result/build
  done
 flock -u 9
-if [[ $test == 1 ]]; then exec "$AXI_PYTHON" third_party/runtime/test.py; fi
+if [[ $test == 1 ]]; then exec "$AXI_PYTHON" third_party/gem5/runtime/test.py; fi
 printf '构建完成。运行：cd user && ./run.sh smoke\n'
