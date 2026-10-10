@@ -11,7 +11,8 @@ user/llm/
 │   ├── Makefile
 │   ├── tinyllm.h
 │   ├── host.cpp
-│   └── kernel.cpp
+│   ├── kernel.cpp
+│   └── llm_parallel.h
 └── result/
 ```
 
@@ -20,6 +21,7 @@ user/llm/
 | [host.cpp](../user/llm/src/host.cpp) | 编译为 `host.elf`，由 gem5 x86 CPU 执行：`on_cpu_cores()` 分片准备权重 → `vx_enqueue_write()` 上传权重和 prompt → `vx_enqueue_launch()` 启动 GPU 程序 → `readback_all()` 回读 → 分片检查 |
 | [kernel.cpp](../user/llm/src/kernel.cpp) | 编译为 `program.elf / program.vxbin`，由 Vortex 执行：从 `kernel_main()` 看整体流程，再看 `forward()`、`norm()`、`linear()` |
 | [tinyllm.h](../user/llm/src/tinyllm.h) | 两份程序共用的模型定义：参数、权重、词表和布局 |
+| [llm_parallel.h](../user/llm/src/llm_parallel.h) | 组内共享局部内存结构：中间向量、计数与每线程工作量 |
 | [Makefile](../user/llm/src/Makefile) | `HOST_SOURCES` 指定 CPU 源码，`KERNEL_SOURCES` 指定 GPU 源码，`MODEL_HEADER` 指定模型头文件 |
 
 模型与 CoralNPU 示例一致，计算流程也保持对应，设备入口和数学函数使用 Vortex SDK。
@@ -66,7 +68,12 @@ CPU 程序负责准备和传输输入；GPU 程序分三段：初始化 KV cache
 
 开启 KV cache 后，第一轮处理完整 prompt，后续每轮只计算新位置。关闭后每轮重算当前前缀。两种方式应生成相同 token，可用来观察访存和执行周期差异。
 
-推理在 GPU 内核中执行，使用 FP32。SDK 提供单精度平方根和 Softmax 所需指数函数。仿真完成后，运行入口在实际 Linux 主机上执行 Python 参考程序，以 FP64 独立重算完整前缀并核对设备实际输出；这部分属于验收，不计入模拟 CPU 的执行统计。
+推理在 GPU 内核中执行，使用 FP32。`linear()` 中线程 t 处理输出列
+`t, t + blockDim.x, t + 2 × blockDim.x, ...`，每列仍按输入行顺序累加。
+中间数组放在工作组的共享局部内存，由 `launch.lmem_size` 分配，
+阶段之间使用 `__syncthreads()`；
+线程 0 的串行阶段和输出列尾块使用 `vx_split/vx_join` 显式控制活动线程，LayerNorm、注意力、Softmax、贪心选择及观测记录由组内线程 0 完成。
+这是 SIMT 多线程计算，程序没有使用 RVV 指令。SDK 提供单精度平方根和 Softmax 所需指数函数。仿真完成后，运行入口在实际 Linux 主机上执行 Python 参考程序，以 FP64 独立重算完整前缀并核对设备实际输出；这部分属于验收，不计入模拟 CPU 的执行统计。
 
 CPU 默认四核；准备与回读检查两个阶段都按下表分工。`host.cpp` 的 `on_cpu_cores()` 用 `std::thread` 和屏障执行这些任务，主线程还负责上传与发射。
 
@@ -77,7 +84,9 @@ CPU 默认四核；准备与回读检查两个阶段都按下表分工。`host.c
 | 2 | `[502, 753)` | 251 |
 | 3 | `[753, 1004)` | 251 |
 
-修改 `host.num_cpus` 会重新划分这 1004 个存储字。当前简明 LLM 内核发射 1 个 GPU 工作组、1 个线程，完整 Transformer 在 GPU 中计算；CPU 多核负责输入准备和返回权重检查。
+修改 `host.num_cpus` 会重新划分这 1004 个存储字。LLM 内核发射一个 GPU 工作组，组内线程数为 `min(8, gpu.threads × gpu.warps)`。
+默认配置使用 8 个线程、2 个 warp，运行在一个 GPU 核上。
+CPU 多核负责输入准备和返回权重检查；GPU 线性层的输出列由多个线程分工计算。
 
 ## 3. 外部数据布局
 
@@ -104,14 +113,21 @@ cat llm/result/first/host_summary.json
 
 默认输入 `"red "`，生成 `"blu"`，token ID 为 `[4, 10, 15]`。这是三次生成的输出；与 prompt 连起来为 `"red blu"`。
 
+`build/program.dis` 保存设备 ELF 的反汇编，`build/sources/` 保存本次源码。
 `llm_summary.json` 保存生成结果、前向计算次数、逐阶段检查数量与最大误差。验收会核对：
 
 - 实际回读字节与在线内存最终值一致。
 - 权重逐字节一致；KV 和中间结果与独立参考一致。
 - prompt、生成 token、前向次数和完成状态正确。
+- 线性层调用数、实际参与线程数、warp 数和每线程计算的输出列数与独立推导一致。
 - AXI、Flit、MEMSIM 和 VCD 之间的数据、顺序、时刻一致。
 
 默认 KV cache 打开，处理 6 个位置；关闭后按 4、5、6 个位置重算，共 15 次前向位置计算。两个配置的输出 token 应一致。
+
+默认输入完成 42 次并行线性层调用，各线程处理列数为 `[60,54,54,54,54,54,54,54]`。
+设备把计数写入 report，CPU 回读真实字节，独立校验结果保存在 `llm_summary.json.execution`。
+在 `user/` 中执行 `./run.sh llm --test`，默认 LLM 场景运行一次，并完成相关验收。
+其他配置实验可以使用 `--config` 单独运行。
 
 CPU 分工看 `host_summary.json` 的 `phases.prepare`、`phases.check`；每核实际执行看 `cores` 和 `active_cpus`。源码与二进制对应关系看 `build/programs.json`，完整字段说明见[环境配置说明第 6 节](01-用户环境配置说明.md#6-cpugpu-分别跑什么cpu-多核怎么看)。
 

@@ -27,8 +27,8 @@ with (CACHE/'application.lock').open('a') as lock:
         for name,t in model['tensors'].items():
             offset=t.pop('offset');t['data']=values[offset:offset+math.prod(t['shape'])]
         load_model(model);prompt=encode(model,b['prompt']);positions=len(prompt)+b['generated_tokens']-1
-        header += [f'#define LLM_PROMPT_LENGTH {len(prompt)}',f'#define LLM_GENERATE {b["generated_tokens"]}',f'#define LLM_KV_CACHE {int(b["kv_cache"])}','#ifndef __VORTEX__','static const unsigned prompt_image[LLM_PROMPT_LENGTH] = {'+','.join(map(str,prompt))+'};','#endif']
-        ranges=[(0,len(values)*4),(0x10000,16*8*4),(0x20000,16*8*4),(0x30000,positions*148*4),(0x40000,positions*4),(0x50000,(96+b['generated_tokens'])*4)]
+        header += [f'#define LLM_GPU_THREADS {min(model["architecture"]["dim"],c["gpu"]["threads"]*c["gpu"]["warps"])}',f'#define LLM_PROMPT_LENGTH {len(prompt)}',f'#define LLM_GENERATE {b["generated_tokens"]}',f'#define LLM_KV_CACHE {int(b["kv_cache"])}','#ifndef __VORTEX__','static const unsigned prompt_image[LLM_PROMPT_LENGTH] = {'+','.join(map(str,prompt))+'};','#endif']
+        ranges=[(0,len(values)*4),(0x10000,16*8*4),(0x20000,16*8*4),(0x30000,positions*148*4),(0x40000,positions*4),(0x50000,136*4)]
     else:
         header+=['#define APP_'+k+' '+str(v)+'u' for k,v in b['defines'].items()]
         ranges=[(int(e['address'],0)-0x90000000,4) for e in b['expect']]+[(0x5000c,4)]
@@ -41,7 +41,7 @@ with (CACHE/'application.lock').open('a') as lock:
     for key in ('CFLAGS','CXXFLAGS','CPPFLAGS','LDFLAGS','DEBUG'):env.pop(key,None)
     env['CONFIGS']=simx_flags(c)
     subprocess.run(['make','-C',str(stage),'-j',os.environ['BUILD_JOBS']],env=env,check=True)
-    for src,dst in (('application','host.elf'),('kernel.elf','program.elf'),('kernel.vxbin','program.vxbin')):shutil.copy2(stage/src,out/dst)
+    for src,dst in (('application','host.elf'),('kernel.elf','program.elf'),('kernel.vxbin','program.vxbin'),('kernel.dump','program.dis')):shutil.copy2(stage/src,out/dst)
     if model:attach(out/'program.elf',model)
     source_dir=out/'sources'
     if source_dir.exists():shutil.rmtree(source_dir)

@@ -22,6 +22,8 @@ def write_report(root):
         if 'llm' in s:
             r=s['llm'];lines += [f"输入 `{json.dumps(r['prompt'],ensure_ascii=False)}` → 生成 `{r['generated_text']}`；token ID：{r['generated_token_ids']}。",'',
               f"{r['model_parameters']} 个参数；KV cache={r['kv_cache']}；前向位置计算 {r['forward_calls']} 次。权重、KV、中间结果、token 和完成状态已逐项核对。",'',
+              f"SIMT FP32 线性层：{r['execution']['workgroups']} 个工作组、{r['execution']['active_threads']} 个实际参与线程、{r['execution']['warps']} 个 warp；完成 {r['execution']['linear_calls']} 次线性层调用。",'',
+              f"各线程完成的输出列数：{r['execution']['columns_per_thread']}。一个工作组在一个 GPU 核上执行；归一化、注意力和生成控制由组内线程 0 处理。",'',
               '数值核对见 [llm_summary.json](llm_summary.json)。','']
         if 'custom' in s:lines+=['自定义输出字均与配置中的期望值一致。','']
         host=s['host_execution']

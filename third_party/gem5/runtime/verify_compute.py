@@ -61,11 +61,19 @@ def check_outputs(c,memory):
     for step,token in enumerate(ref['generated']):
         calls+=1 if b['kv_cache'] and step else len(prompt)+step
         reports.update({16+step:token,32+step:0x70000000+step,64+step:0x71000000+step,96+step:calls})
+    gpu=c['architecture']['simx'];threads=min(dim,gpu['threads']*gpu['warps'])
+    columns=[dim]*4+[model['architecture']['hidden_dim'],dim,model['architecture']['vocab_size']]
+    per_thread=[calls*sum(len(range(t,n,threads)) for n in columns) for t in range(threads)]
+    reports.update({9:7*calls,10:threads,11:threads,12:(threads+gpu['threads']-1)//gpu['threads']})
+    reports.update({128+t:count for t,count in enumerate(per_thread)})
+    assert word(REPORT+52)<gpu['cores'],'GPU execution core outside configured cores'
     for i,value in reports.items():assert word(REPORT+4*i)==value,f'Report mismatch at word {i}'
     return {'llm':{'passed':True,'model_version':model['version'],'model_parameters':sum(len(t['data']) for t in model['tensors'].values()),
         'architecture':model['architecture'],'prompt':b['prompt'],'prompt_tokens':prompt,'generated_token_ids':ref['generated'],
         'generated_text':ref['text'],'kv_cache':b['kv_cache'],'processed_token_positions':len(ref['records']),
         'forward_calls':calls,'verified_float_values':sum(counts.values()),'checked_values_by_stage':dict(counts),
+        'execution':{'mode':'SIMT FP32 linear layers','workgroups':1,'threads':threads,'active_threads':threads,
+                     'warps':reports[12],'core':word(REPORT+52),'linear_calls':7*calls,'columns_per_thread':per_thread},
         'maximum_absolute_error_by_stage':dict(max_error),'numeric_tolerance':{'absolute':2e-5,'relative':2e-5},
         'scope':'Actual GPU output and online memory; independent full-prefix FP64 reference'}}
 

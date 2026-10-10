@@ -1,6 +1,7 @@
 // gem5 x86 CPU 程序：CPU 多线程准备数据，Vortex 执行 kernel.cpp。
 #include "tinyllm.h"
 #include "project_config.h"
+#include "llm_parallel.h"
 #include <host_io.h>
 #include <pthread.h>
 #include <sys/syscall.h>
@@ -67,7 +68,8 @@ int main(int argc, char** argv) {
     launch.kernel = kernel;
     launch.ndim = 1;
     launch.grid_dim[0] = APP_WORKGROUPS;
-    launch.block_dim[0] = 1;
+    launch.block_dim[0] = LLM_GPU_THREADS;
+    launch.lmem_size = sizeof(LlmScratch);
     CHECK(vx_enqueue_launch(queue, &launch, 0, nullptr, &event));
     CHECK(wait_event(event));
 

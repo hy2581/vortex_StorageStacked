@@ -1,0 +1,36 @@
+{
+  "base_commit": "55702a2546d4d3d51f84b32045681a4e0822ce1c",
+  "uses_working_tree_changes": true,
+  "run": "test-20261008-173856",
+  "commands": [
+    "source third_party/gem5/runtime/environment.sh",
+    "make -C user/llm/src CONFIG=../config.json OUT=../result/build",
+    "$AXI_PYTHON third_party/gem5/runtime/test.py"
+  ],
+  "files": [
+    {
+      "name": "host_summary.json",
+      "bytes": 2191
+    },
+    {
+      "name": "input.json",
+      "bytes": 844
+    },
+    {
+      "name": "llm_summary.json",
+      "bytes": 1945
+    },
+    {
+      "name": "program.dis",
+      "bytes": 105444
+    },
+    {
+      "name": "summary.json",
+      "bytes": 1837
+    }
+  ],
+  "result_directories": {
+    "smoke": "../../user/smoke/result/test-20261008-173856/smoke",
+    "llm": "../../user/llm/result/test-20261008-173856/llm"
+  }
+}

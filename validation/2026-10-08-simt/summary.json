@@ -1,0 +1,84 @@
+{
+  "passed": true,
+  "regression_runs": 1,
+  "native_tests_passed": 19,
+  "api_check": {
+    "passed": true,
+    "masked_read": [
+      1,
+      0,
+      3,
+      0,
+      5,
+      0,
+      7,
+      0
+    ],
+    "queue_retry": true,
+    "large_window_bytes": 8589934592,
+    "high_address_no_alias": true,
+    "sparse_zero_initialized": true
+  },
+  "negative": {
+    "passed": true,
+    "checks": {
+      "idle_cpu": true,
+      "missing_worker": true,
+      "duplicate_thread": true,
+      "work_partition": true,
+      "gpu.cores": true,
+      "gpu.l1i_bytes": true,
+      "host.num_cpus": true,
+      "host.l2": true,
+      "host.tlb_entries": true,
+      "axi.outstanding": true,
+      "axi.period_ns": true,
+      "axi.replay": true,
+      "ucie.lanes": true,
+      "ucie.bits_per_symbol": true,
+      "ucie.rate_gtps": true,
+      "memsim.standard": true,
+      "memsim.slots": true,
+      "simulation.max_ticks": true,
+      "smoke_output": true,
+      "smoke_status": true,
+      "weight": true,
+      "kv": true,
+      "intermediate": true,
+      "generated_token": true,
+      "forward_count": true,
+      "linear_count": true,
+      "active_gpu_threads": true,
+      "thread_column_count": true,
+      "missing_output": true
+    }
+  },
+  "cases": {
+    "smoke": {
+      "passed": true,
+      "output": 42,
+      "cycles": 863,
+      "active_cpus": 4,
+      "cpu_instructions": [
+        2372819,
+        38287,
+        8220,
+        6215
+      ],
+      "report": "../../user/smoke/result/test-20261008-173856/smoke/report.md"
+    },
+    "llm": {
+      "passed": true,
+      "output": "blu",
+      "cycles": 225771,
+      "active_cpus": 4,
+      "cpu_instructions": [
+        2874864,
+        281655,
+        17463,
+        15430
+      ],
+      "report": "../../user/llm/result/test-20261008-173856/llm/report.md"
+    }
+  }
+}

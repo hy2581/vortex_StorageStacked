@@ -31,7 +31,8 @@ def check(smoke=None,llm=None):
             bad=memory.copy();bad[address]^=1;reject(name,lambda bad=bad:check_outputs(c,bad))
     if llm:
         c=json.loads((llm/'resolved.json').read_text());memory=readback(llm)
-        for name,address in [('weight',WEIGHTS),('kv',KEY_CACHE),('intermediate',TRACE),('generated_token',REPORT+64),('forward_count',REPORT+384)]:
+        for name,address in [('weight',WEIGHTS),('kv',KEY_CACHE),('intermediate',TRACE),('generated_token',REPORT+64),('forward_count',REPORT+384),
+                             ('linear_count',REPORT+36),('active_gpu_threads',REPORT+44),('thread_column_count',REPORT+512)]:
             bad=memory.copy()
             if name in ('kv','intermediate'):
                 value=struct.unpack('<f',bytes(bad[address+i] for i in range(4)))[0]+1

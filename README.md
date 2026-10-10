@@ -2,6 +2,11 @@
 
 阅读入口：[文档目录](docs/README.md) · [逐文件中文讲解](https://github.com/hy2581/StorageStacked-docs)。
 
+离线 Docker 包及最新兼容脚本见 [离线发布仓库](https://github.com/hy2581/zhongxing-storagestacked-offline)。
+旧版 Docker 编译出现 `posix_spawn failed: Operation not permitted` 时，按
+[Docker 兼容说明](https://github.com/hy2581/zhongxing-storagestacked-offline/blob/main/DOCKER_COMPATIBILITY.md)
+使用临时入口；源码和文档可通过该入口的 `shell` 命令查看。
+
 基于 gem5 多核 CPU 与 Vortex GPU 执行用户程序，经 AXI256、UCIe 访问在线 MEMSIM。用户在 `user/` 配置、编译、运行和查看结果；`integration/` 提供与独立 AXI 存储项目的连接。
 
 ## 目录
@@ -13,7 +18,7 @@ vortex_StorageStacked/
 ├── user/
 │   ├── run.sh
 │   ├── smoke/               config.json + src/Makefile、host.cpp、kernel.cpp + result/
-│   └── llm/                 config.json + src/Makefile、host.cpp、kernel.cpp、tinyllm.h + result/
+│   └── llm/                 config.json + src/、模型与并行计算头文件 + result/
 ├── docs/                    用户说明和研究成果分析
 ├── third_party/
 │   ├── gem5/                CPU 仿真、平台构建与运行支持
@@ -45,7 +50,7 @@ cd user
 ```
 
 - **SMOKE**：CPU 多线程准备默认输入 `41` 并上传，GPU 四个工作组分别读入、加一，CPU 回读检查输出 `42`。
-- **LLM**：与 CoralNPU 示例采用相同 TinyLLM 模型；输入 `"red "`，生成 `"blu"`，token ID `[4, 10, 15]`。
+- **LLM**：与 CoralNPU 示例采用相同 TinyLLM 模型；输入 `"red "`，生成 `"blu"`，token ID `[4, 10, 15]`。线性层使用 SIMT FP32，默认 8 个 GPU 线程协作计算。
 
 每个项目只有一个 `config.json`。其中配置程序输入、GPU 核/warp/线程、CPU 核数、MMU/TLB、缓存、AXI、UCIe、MEMSIM 和仿真上限。修改后直接运行；需要更新的平台编译由入口处理。
 
@@ -65,7 +70,9 @@ cd user
 
 结果保存到 `user/<项目>/result/<运行目录>/`。入口打印 `report.md` 位置；成功要求 `summary.json` 的 `passed: true`。
 
-先看 `report.md`；`host_summary.json` 给出线程分片和每核实际指令、缓存及 MMU 活动，`build/programs.json` 对应 CPU/GPU 程序，`build/sources/` 保存本次源码。目录还保存配置、实际回读字节、AXI VCD、Flit、内存记录和链路视图。TinyLLM 会逐项核对权重、KV、中间结果与 token。
+先看 `report.md`；`host_summary.json` 给出线程分片和每核实际指令、缓存及 MMU 活动，`build/programs.json` 对应 CPU/GPU 程序，`build/sources/` 保存本次源码。目录还保存配置、实际回读字节、AXI VCD、Flit、内存记录和链路视图。TinyLLM 会逐项核对权重、KV、中间结果、token、线性层调用数和各 GPU 线程的实际工作量。
+LLM 使用一个工作组，线程数为 `min(8, gpu.threads × gpu.warps)`；一个工作组在一个 GPU 核上执行。
+归一化、注意力和生成控制由组内线程 0 完成，线性层输出列由各线程分工计算。
 
 ```bash
 # 在 user/ 中执行单类回归
@@ -75,7 +82,7 @@ cd user
 ./build.sh --test
 ```
 
-整体回归包含 9 组平台场景、19 项原生测试、在线内存接口与 26 项错误拒绝检查。默认 SMOKE 为 `41 → 42`，TinyLLM 为 `"red " → "blu"`；检查四核/两核实际执行、慢内存、KV cache、重放和硬件参数变更。各场景结果位于 `user/<项目>/result/test-<时间>/<场景>/`，整体汇总路径由测试入口打印。新增项目的复现步骤见 [SMOKE 指南](docs/02-用户从0开始添加SMOKE简要指南.md)。
+平台回归执行一次：默认 SMOKE 和默认 LLM 各运行一次，并执行原生内存测试、在线内存接口和错误拒绝检查。默认 SMOKE 为 `41 → 42`，TinyLLM 为 `"red " → "blu"`；核对 CPU 多核实际执行、GPU 各线程完成的输出列数、独立数值和完整存储链路。各场景结果位于 `user/<项目>/result/test-<时间>/<场景>/`，整体汇总路径由测试入口打印。单独执行 `./run.sh llm --test` 时，默认 LLM 仿真只运行一次。验收结果见 [SIMT 验收说明](validation/2026-10-08-simt/README.md)。新增项目的复现步骤见 [SMOKE 指南](docs/02-用户从0开始添加SMOKE简要指南.md)。
 
 ## 运行链路
 
